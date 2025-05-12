@@ -1,0 +1,60 @@
+/* Navbar.css */
+
+.Navbar {
+    width: 100%;
+    height: 80px;
+    background-color: #5894ee
+    ;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2%; /* Adjust the padding between left and right side */
+  }
+  
+  .leftSide {
+    display: flex;
+    align-items: center;
+  }
+  
+  .leftSide img {
+    width: 90px; /* Adjust the width as needed */
+    height: 90px; /* Automatically adjust height to maintain aspect ratio */
+    object-fit: cover;
+  }
+  
+  .rightSide {
+    display: flex;
+    gap: 50px; /* Adjust the gap between links */
+    margin-left: 20px; /* Adjust the margin between left and right side */
+    padding-right: 5%; /* Add padding to the right side */
+  }
+  
+  .rightSide a {
+    text-decoration: none;
+    color: rgb(243, 234, 234); /* Default text color */
+    padding: 8px 16px;
+    transition: color 0.3s; /* Smooth transition for color change */
+    border: 1px solid transparent; /* Add transparent border to all links */
+    border-radius: 20px; /* Apply rounded edges */
+  }
+  
+  .rightSide a:hover {
+    color: rgb(1, 1, 37); /* Change to desired color on hover */
+    transform: scale(1.1); /* Increase scale by 10% on hover */
+  }
+  
+  /* Add border to specific links */
+  .rightSide a[href="/"] {
+    border: 1px solid #fff; /* Border for Home link */
+  }
+  
+  .rightSide a[href="/Logout"] {
+    border: 1px solid #fff; /* Border for Log Out link */
+  }
+  
+
+html, body {
+  overflow-x: hidden;
+  overflow-y: hidden;
+
+}
