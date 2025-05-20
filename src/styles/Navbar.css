@@ -1,60 +1,58 @@
-/* Navbar.css */
-
 .Navbar {
-    width: 100%;
-    height: 80px;
-    background-color: #5894ee
-    ;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 2%; /* Adjust the padding between left and right side */
-  }
-  
-  .leftSide {
-    display: flex;
-    align-items: center;
-  }
-  
-  .leftSide img {
-    width: 90px; /* Adjust the width as needed */
-    height: 90px; /* Automatically adjust height to maintain aspect ratio */
-    object-fit: cover;
-  }
-  
-  .rightSide {
-    display: flex;
-    gap: 50px; /* Adjust the gap between links */
-    margin-left: 20px; /* Adjust the margin between left and right side */
-    padding-right: 5%; /* Add padding to the right side */
-  }
-  
-  .rightSide a {
-    text-decoration: none;
-    color: rgb(243, 234, 234); /* Default text color */
-    padding: 8px 16px;
-    transition: color 0.3s; /* Smooth transition for color change */
-    border: 1px solid transparent; /* Add transparent border to all links */
-    border-radius: 20px; /* Apply rounded edges */
-  }
-  
-  .rightSide a:hover {
-    color: rgb(1, 1, 37); /* Change to desired color on hover */
-    transform: scale(1.1); /* Increase scale by 10% on hover */
-  }
-  
-  /* Add border to specific links */
-  .rightSide a[href="/"] {
-    border: 1px solid #fff; /* Border for Home link */
-  }
-  
-  .rightSide a[href="/Logout"] {
-    border: 1px solid #fff; /* Border for Log Out link */
-  }
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  background-color: #5894ee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2%;
+  z-index: 1000;
+  font-family: 'Poppins', sans-serif;
+  color: #fff;
+}
+
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.logo {
+  height: 30px;
+  width: auto;
+  margin-bottom: 2px;
+}
+
+.logo-text-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+
+.logo-text {
+  font-size: 9px;
+  font-weight: bold;
+  color: white;
+}
+
+.logo-subtext {
+  font-size: 6px;
+  font-weight: bold;
+  color: white;
+  margin-top: 2px;
+}
+
+
   
 
-html, body {
+/* html, body {
   overflow-x: hidden;
   overflow-y: hidden;
 
-}
+} */

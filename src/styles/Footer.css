@@ -1,0 +1,23 @@
+.footer {
+  position: fixed; /* Fixed position */
+  left: 0; /* Align to the left */
+  bottom: 0; /* Align to the bottom */
+  width: 100%; /* Occupy full width */
+  height: 30px; /* Decrease the height */
+  background-color: #19475e; /* Background color */
+  color: white; /* Text color */
+  text-align: left; /* Align text to the left */
+  padding: 10px 0; /* Add padding */
+}
+
+.socialMedia svg {
+  color: white;
+  margin: 20px;
+  font-size: 70px;
+  cursor: pointer;
+}
+
+.footer p {
+  color: white;
+  margin-left: 2px; /* Add margin from the left */
+}

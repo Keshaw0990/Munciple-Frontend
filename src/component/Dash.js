@@ -1,27 +1,38 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
+import { FaFilter } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import "../styles/Dash.css";
 const buttonStyle = {
   display: 'block',
   width: '100%',
-  padding: '10px 15px',
+  padding: '5px 10px',
   marginBottom: '10px',
   backgroundColor: '#0d6efd',
   color: 'white',
   border: 'none',
   borderRadius: '6px',
-  fontSize: '22px',
+  fontSize: '12px',
+
   cursor: 'pointer'
 };
 
 const listItemStyle = {
-  padding: '12px 16px',
+  padding: '5px 10px',
   borderBottom: '1px solid #dee2e6',
-  fontSize: '22px',
+  fontSize: '10px',
   backgroundColor: '#fff',
   color: '#003366' // You can change this to any color you like
 };
 
-
+const cellStyle = {
+  border: '1px solid #dee2e6',
+  padding: '6px 8px',
+  fontSize: '13px',
+  wordWrap: 'break-word',
+  textAlign: 'center',
+  whiteSpace: 'normal',
+};
 export default function Dash() {
   const [loading, setLoading] = useState(true);
 const [error, setError] = useState(null);
@@ -30,17 +41,66 @@ const [error, setError] = useState(null);
   const[showTransactional, setShowTransactional]= useState(false);
   const[showPhone, setShowPhone]= useState(false);
   const[showReport, setShowReport]= useState(false);
-  const COLORS = ['#FF8042', '#00C49F', '#FFBB28'];
-const pieData = [
-  { name: 'Pending', value: complaints.length },  // Dynamic
-  { name: 'Resolved', value: 5 },
-  { name: 'Other', value: 3 },
-];
+  const [selectedStatus, setSelectedStatus] = useState(null);
+const [selectedPeriod, setSelectedPeriod] = useState(null); // 'month' | 'week' | 'yesterday'
+const [allData, setAllData] = useState([]);
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+
+  const navigate = useNavigate();
+  
+  const resolvedCount = complaints.filter(c => c.status === 'Resolved').length;
+const pendingCount = complaints.filter(c => c.status === 'Pending').length;
+useEffect(() => {
+  fetch('http://localhost:8080/api/complaints/all')
+    .then(res => res.json())
+    .then(data => {
+      setAllData(data);
+       console.log("AAAAA",data)
+    })
+   
+    .catch(err => console.error('Failed to fetch data', err));
+}, []);
+
+
+
+const getStatusWiseData = (complaints) => {
+  const statusCount = {};
+
+  complaints.forEach(item => {
+    const status = item.status || 'Unknown';
+    statusCount[status] = (statusCount[status] || 0) + 1;
+  });
+const pieData = complaints.length > 0 ? getStatusWiseData(complaints) : [];
+  return Object.keys(statusCount).map(status => ({
+    name: status,
+    value: statusCount[status]
+  }));
+};
+
+const filteredComplaints = selectedStatus
+  ? complaints.filter(item => item.status === selectedStatus)
+  : complaints;
+
+// Get Pie Chart Data
+const pieData = useMemo(() => {
+  const statusCount = {};
+
+  complaints.forEach(item => {
+    const status = item.status || 'Unknown';
+    statusCount[status] = (statusCount[status] || 0) + 1;
+  });
+
+  return Object.keys(statusCount).map(status => ({
+    name: status,
+    value: statusCount[status]
+  }));
+}, [complaints]);
+
 // Fetch data from the API
 
 // Fetch data from the API
 useEffect(() => {
-  fetch('http://localhost:8080/api/complaints/unresolved')
+  fetch('http://localhost:8080/api/complaints/all')
     .then(response => {
       if (!response.ok) {
         console.error('Response not OK:', response.status, response.statusText);
@@ -60,6 +120,78 @@ useEffect(() => {
     });
 }, []);
 
+const now = new Date();
+
+// Helper function to parse date safely
+const parseDate = (dateString) => new Date(dateString);
+
+// Last 30 days: items with createdAt >= now - 30 days
+const last30Days = complaints.filter(item => {
+  const createdAt = parseDate(item.createdAt);
+  const daysAgo30 = new Date();
+  daysAgo30.setDate(daysAgo30.getDate() - 30);
+  return createdAt >= daysAgo30 && createdAt <= now;
+});
+
+// Last 7 days: items with createdAt >= now - 7 days
+const last7Days = complaints.filter(item => {
+  const createdAt = parseDate(item.createdAt);
+  const daysAgo7 = new Date();
+  daysAgo7.setDate(daysAgo7.getDate() - 7);
+  return createdAt >= daysAgo7 && createdAt <= now;
+});
+
+// Yesterday: items with createdAt on the day before today
+const yesterday = complaints.filter(item => {
+  const createdAt = parseDate(item.createdAt);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);  // start of today
+  const yesterdayStart = new Date(today);
+  yesterdayStart.setDate(yesterdayStart.getDate() - 1); // start of yesterday
+  const yesterdayEnd = new Date(today);
+  yesterdayEnd.setMilliseconds(-1);  // end of yesterday (just before today starts)
+  return createdAt >= yesterdayStart && createdAt <= yesterdayEnd;
+});
+console.log(complaints);
+console.log('Last 30 days:', last30Days.length);
+console.log('Last 7 days:', last7Days.length);
+console.log('Yesterday:', yesterday.length);
+
+const getStatusCounts = (data) => {
+  const statusCounts = {};
+  data.forEach(item => {
+    const status = item.status;
+    statusCounts[status] = (statusCounts[status] || 0) + 1;
+  });
+  return Object.entries(statusCounts).map(([name, value]) => ({ name, value }));
+};
+
+const pieDataMonth = getStatusCounts(last30Days);
+const pieDataWeek = getStatusCounts(last7Days);
+const pieDataYesterday = getStatusCounts(yesterday);
+
+console.log('Pie Data Month:', pieDataMonth);
+console.log('Pie Data Week:', pieDataWeek);
+console.log('Pie Data Yesterday:', pieDataYesterday);
+
+const filteredComplaintsByStatus = last30Days.filter(
+  (item) => item.status === selectedStatus
+);
+
+let filteredData = [];
+
+if (selectedStatus && selectedPeriod) {
+  if (selectedPeriod === 'month') {
+    filteredData = last30Days.filter((item) => item.status === selectedStatus);
+  } else if (selectedPeriod === 'week') {
+    filteredData = last7Days.filter((item) => item.status === selectedStatus);
+  } else if (selectedPeriod === 'yesterday') {
+    filteredData = yesterday.filter((item) => item.status === selectedStatus);
+  }
+} else {
+  // Show all data by default
+ filteredData = allData; 
+}
 
 
   return (
@@ -68,18 +200,21 @@ useEffect(() => {
       {/* Left Side: Contact List */}
       <div
         style={{
-          width: '300px',
-          marginLeft: '-1.5%',
-          marginRight: '2rem',
-          background: '#19475e',
-          padding: '1rem',
-          borderRadius: '8px',
-          height: '100vh',
-          overflowY: 'auto',
-          color: 'white'
+    position: 'fixed',        // 👈 Fixes the sidebar
+    top: '40px',              // 👈 Pushes it below the fixed navbar
+    left: 0,
+    width: '130px',
+    background: '#19475e',
+    padding: '1rem',
+    borderRadius: '0 8px 8px 0',
+    height: 'calc(100vh - 45px)', // 👈 Full height minus navbar
+    overflowY: 'auto',
+    color: 'white',
+    zIndex: 999,
         }}
       >
-        <h2 style={{ textAlign: 'center' }}>Contact List</h2>
+        <h3 style={{ textAlign: 'center', }}>Contact List</h3>
+
 <button style={buttonStyle} onClick={() => setShowMessages(!showMessages)}>Message</button>
 
 {showMessages && (
@@ -141,129 +276,299 @@ useEffect(() => {
             </div>
           )
         }
-        <button style={buttonStyle} onClick={() => setShowReport(!showReport)}>Reports</button>
-        {
-          showReport &&
-          ( <div  style={{ marginTop: '1rem', maxWidth: '400px', margin: '1rem auto' }}>
-            <ul style={{
-      listStyle: 'none',
-      padding: 0,
-      margin: 0,
-      backgroundColor: '#f8f9fa',
-      borderRadius: '8px',
-      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-      overflow: 'hidden'
-    }}>
-              <li style={listItemStyle}>First Report</li>
-              <li style={listItemStyle}>Second Report</li>
-              <li style={listItemStyle}>Third Report</li>
-            </ul>
-            </div>
-          )
-        }
+        <button style={buttonStyle} onClick={() => navigate('/Info')} >Reports</button>
+       
           </div>
 
       {/* Right Side: Dashboard Content */}
-      <div style={{ flex: 1, marginTop: '-10px' }}>
-        <h1>Dashboard</h1>
+      <div style={{ flex: 1, marginTop: '1px', marginLeft: '12%' }}>
+      
+        <h3>Dashboard</h3>
 
         {/* Summary Boxes */}
-        <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem', height: '150px' }}>
-          <div style={{ flex: 1, background: '#f0f0f0', padding: '1rem', borderRadius: '8px' }}>
-        
-<p style={{ marginTop: '42px', fontSize: '30px', fontWeight: 'bold' }}>
+        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', height: '100px',width:'100%' }}>
+          <div style={{ flex: 1, background: '#f0f0f0', padding: '1rem', borderRadius: '8px', }}>
+        <p style={{ marginTop: '22px', fontSize: '22px', fontWeight: 'bold',marginLeft: '110px' }}>
    {complaints.length}
 </p>
 
-            <div style={{ background: '#0d6efd', height: '85px', width: '170px', padding: '1rem', borderRadius: '8px', color: 'white',marginTop: '-110px' }}>
-              <h3>Pending Complaints</h3>
+           <div style={{background: '#0d6efd',height: '35px',padding: '1rem',borderRadius: '8px',color: 'white',width: '100px',fontSize: '12px',display: 'flex',alignItems: 'center',justifyContent: 'center', marginTop: '-33%'}}>
+              <h3 style={{ margin: 0 }}>Total Complaints</h3>
             </div>
           </div>
           <div style={{ flex: 1, background: '#f0f0f0', padding: '1rem', borderRadius: '8px' }}>
-            <div style={{ background: '#0d6efd', height: '85px', padding: '1rem', borderRadius: '8px', color: 'white', width: '170px' }}>
-              <h3>Resolve</h3>
-            </div>
+            <p style={{ marginTop: '22px', fontSize: '22px', fontWeight: 'bold',marginLeft: '110px' }}>
+   {resolvedCount}
+</p>
+              <div style={{background: '#0d6efd',height: '35px',padding: '1rem',borderRadius: '8px',color: 'white',width: '100px',fontSize: '12px',display: 'flex',alignItems: 'center',justifyContent: 'center', marginTop: '-33%'}}>
+   
+    <h3 style={{ margin: 0 }}>Resolved Complaints</h3>
+  </div>
           </div>
+        <div style={{ flex: 1, background: '#f0f0f0', padding: '1rem', borderRadius: '8px' }}>
+        <p style={{ marginTop: '22px', fontSize: '22px', fontWeight: 'bold',marginLeft: '110px' }}>
+   {pendingCount}
+</p>
+  <div style={{background: '#0d6efd',height: '35px',padding: '1rem',borderRadius: '8px',color: 'white',width: '100px',fontSize: '12px',display: 'flex',alignItems: 'center',justifyContent: 'center', marginTop: '-33%'}}>
+    <h3 style={{ margin: 0 }}>Pending Complaints</h3>
+  </div>
+</div>
+
           <div style={{ flex: 1, background: '#f0f0f0', padding: '1rem', borderRadius: '8px' }}>
-            <div style={{ background: '#0d6efd', height: '85px', padding: '1rem', borderRadius: '8px', color: 'white', width: '170px' }}>
-              <h3>Highest</h3>
-            </div>
-          </div>
+ <div style={{background: '#0d6efd',height: '35px',padding: '1rem',borderRadius: '8px',color: 'white',width: '100px',fontSize: '12px',display: 'flex',alignItems: 'center',justifyContent: 'center', marginTop: '1%'}}>
+    <h3 style={{ margin: 0 }}>Empty</h3>
+  </div>
+</div>
+
         </div>
-        <PieChart width={300} height={250}>
+
+ <div style={{ display: 'flex', justifyContent: '', gap: '100px' , fontSize: '11px', marginTop: '-10px', marginLeft: '5%' }}>
+  {/* Month Wise PieChart */}
+  <div style={{ textAlign: 'center' }}>
+    <h2>Months Wise</h2>
+ <PieChart width={250} height={250}>
   <Pie
-    data={pieData}
+    data={pieDataMonth}
     cx="50%"
-    cy="50%"
-    innerRadius={50}
-    outerRadius={90}  // Increased from 50 to 100
+    cy="30%"
+    outerRadius={70}
     fill="#8884d8"
-    paddingAngle={5}
     dataKey="value"
-    label
+    onClick={(data) => {
+      setSelectedStatus(data.name);
+      setSelectedPeriod('month');
+    }}
   >
-    {pieData.map((entry, index) => (
-      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+    {pieDataMonth.map((entry, index) => (
+      <Cell key={`cell-month-${index}`} fill={COLORS[index % COLORS.length]} />
     ))}
   </Pie>
   <Tooltip />
+  <Legend layout="vertical" align="right" verticalAlign="top" />
 </PieChart>
 
-     
+  </div>
 
-        {/* Complaints Table */}
-        <h2 style={{ marginTop: '2rem' }}>Unresolved Complaints</h2>
-        <div style={{ maxHeight: '400px', overflowY: 'auto', overflowX: 'auto' }}>
-  <table style={{ 
-    width: '100%', 
-    borderCollapse: 'collapse', 
-    fontFamily: 'Arial, sans-serif', 
-    fontSize: '14px',
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' 
-  }}>
+  {/* Week Wise PieChart */}
+  <div style={{ textAlign: 'center' }}>
+    <h2>Week Wise</h2>
+   <PieChart width={250} height={250}>
+  <Pie
+    data={pieDataWeek}
+    cx="50%"
+    cy="30%"
+    outerRadius={70}
+    fill="#8884d8"
+    dataKey="value"
+    onClick={(data) => {
+      setSelectedStatus(data.name);
+      setSelectedPeriod('week');
+    }}
+  >
+    {pieDataWeek.map((entry, index) => (
+      <Cell key={`cell-week-${index}`} fill={COLORS[index % COLORS.length]} />
+    ))}
+  </Pie>
+  <Tooltip />
+  <Legend layout="vertical" align="right" verticalAlign="top" />
+</PieChart>
+
+  </div>
+
+  {/* Yesterday Wise PieChart */}
+  <div style={{ textAlign: 'center' }}>
+    <h2>Yesterday Wise</h2>
+   <PieChart width={250} height={250}>
+  <Pie
+    data={pieDataYesterday}
+    cx="50%"
+    cy="30%"
+    outerRadius={70}
+    fill="#8884d8"
+    dataKey="value"
+    onClick={(data) => {
+      setSelectedStatus(data.name);
+      setSelectedPeriod('yesterday');
+    }}
+  >
+    {pieDataYesterday.map((entry, index) => (
+      <Cell key={`cell-yesterday-${index}`} fill={COLORS[index % COLORS.length]} />
+    ))}
+  </Pie>
+  <Tooltip />
+  <Legend layout="vertical" align="right" verticalAlign="top" />
+</PieChart>
+
+  </div>
+</div>
+<div
+  style={{
+    position: 'sticky',
+    top: 0,
+    zIndex: 10,
+    display: 'flex',
+    justifyContent: 'flex-end',
+    padding: '10px 20px',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+  }}
+>
+  <div
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '12px', // space between button and filter
+      marginTop: '-16%',
+    }}
+  >
+    {/* Clear Filter Button */}
+    {selectedStatus && selectedPeriod && (
+      <button
+        onClick={() => {
+          setSelectedStatus(null);
+          setSelectedPeriod(null);
+        }}
+        style={{
+          backgroundColor: '#0d6efd',
+          color: 'white',
+          border: 'none',
+          padding: '8px 16px',
+          fontSize: '14px',
+          borderRadius: '6px',
+          cursor: 'pointer',
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+          transition: 'background-color 0.3s ease',
+        }}
+        onMouseEnter={(e) =>
+          (e.currentTarget.style.backgroundColor = '#0b5ed7')
+        }
+        onMouseLeave={(e) =>
+          (e.currentTarget.style.backgroundColor = '#0d6efd')
+        }
+      >
+        All Data
+      </button>
+    )}
+
+    {/* Filter Icon */}
+    <div
+      onClick={() => navigate('/table')}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        cursor: 'pointer',
+        backgroundColor: '#f0f0f0',
+        padding: '6px 12px',
+        borderRadius: '6px',
+        boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+      }}
+    >
+      <FaFilter style={{ fontSize: '20px', marginRight: '6px' }} />
+      <span style={{ fontWeight: 'bold' }}>Filter</span>
+    </div>
+  </div>
+</div>
+
+
+ {/* Complaints Table */}
+        {/* <h4 style={{ marginTop: '2rem', marginLeft: '50%' }}>Unresolved Complaints</h4> */}
+<div
+  style={{
+    width: '1000px',
+    margin: '20px auto',
+    height: '300px',
+    overflow: 'auto',
+    border: '1px solid #ccc',
+    borderRadius: '8px',
+    boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+    padding: '10px',
+    backgroundColor: '#f9f9f9',
+     marginTop: '-6%'
+  }}
+>
+  <h5 style={{ textAlign: 'center',marginTop: '1%' }}>
+    {selectedStatus && selectedPeriod
+      ? `Complaints with status "${selectedStatus}" (${selectedPeriod === 'month' ? 'Last 1 Month' : selectedPeriod === 'week' ? 'Last 1 Week' : 'Yesterday'})`
+      : 'All Complaints'}
+  </h5>
+
+  <table
+    style={{
+      width: '100%',
+      borderCollapse: 'collapse',
+      fontSize: '8px',
+      tableLayout: 'fixed',
+    }}
+  >
     <thead>
-      <tr style={{ backgroundColor: '#0d6efd', color: 'white' }}>
+      <tr
+        style={{
+          background: 'linear-gradient(to right, #0d6efd, #1BA1E2)',
+          color: 'white',
+          boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+        }}
+      >
         {['Name', 'Category', 'Description', 'Status', 'Time', 'Phone No', 'Whats ID'].map((heading, idx) => (
-          <th key={idx} style={{
-            border: '1px solid #dee2e6',
-            padding: '10px',
-            position: 'sticky',
-            top: 0,
-            backgroundColor: '#1BA1E2',
-            zIndex: 1,
-            textAlign: 'center',
-            fontSize: '20px',
-            fontWeight: 'bold',
-          }}>
+          <th
+            key={idx}
+            style={{
+              border: '1px solid #dee2e6',
+              padding: '6px',
+              position: 'sticky',
+              top: -10,
+              backgroundColor: '#1BA1E2',
+              zIndex: 1,
+              textAlign: 'center',
+              fontWeight: 'bold',
+              fontSize: '15px',
+              width: '120px',
+              ...(idx === 0 && { borderTopLeftRadius: '6px' }),
+              ...(idx === 6 && { borderTopRightRadius: '6px' }),
+            }}
+          >
             {heading}
           </th>
         ))}
       </tr>
     </thead>
     <tbody>
-      {complaints.map((item, index) => (
-        <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#f9f9f9' : '#ffffff', fontSize: '18px' }}>
-          <td style={{ border: '1px solid #dee2e6', padding: '10px' }}>{item.userName}</td>
-          <td style={{ border: '1px solid #dee2e6', padding: '10px' }}>{item.category}</td>
-          <td style={{ border: '1px solid #dee2e6', padding: '10px' }}>{item.description}</td>
-          <td style={{ 
-            border: '1px solid #dee2e6', 
-            padding: '10px', 
-            fontWeight: 'bold', 
-            color: item.status === 'Pending' ? 'red' : 'green' 
-          }}>
+      {filteredData.map((item, index) => (
+        <tr
+          key={index}
+          style={{
+            backgroundColor: index % 2 === 0 ? '#f1f9ff' : '#ffffff',
+            transition: 'background-color 0.3s',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#d9efff')}
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.backgroundColor = index % 2 === 0 ? '#f1f9ff' : '#ffffff')
+          }
+        >
+          <td style={cellStyle}>{item.userName}</td>
+          <td style={cellStyle}>{item.category}</td>
+          <td style={{ ...cellStyle, maxWidth: '250px' }}>{item.description}</td>
+          <td style={{ ...cellStyle, color: item.status === 'Pending' ? 'red' : 'green', fontWeight: 'bold' }}>
             {item.status}
           </td>
-          <td style={{ border: '1px solid #dee2e6', padding: '10px' }}>{item.createdAt}</td>
-          <td style={{ border: '1px solid #dee2e6', padding: '10px' }}>{item.phoneNumber}</td>
-          <td style={{ border: '1px solid #dee2e6', padding: '10px' }}>{item.whatsappId}</td>
+          <td style={{ ...cellStyle, whiteSpace: 'nowrap', minWidth: '180px', textAlign: 'left' }}>
+            {new Date(item.createdAt).toLocaleString('en-IN', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </td>
+          <td style={cellStyle}>{item.phoneNumber}</td>
+          <td style={cellStyle}>{item.whatsappId}</td>
         </tr>
       ))}
     </tbody>
   </table>
 </div>
 
-      </div>
+
+
+ </div>
     </div>
   );
 }
