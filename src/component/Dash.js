@@ -13,7 +13,6 @@ const buttonStyle = {
   border: 'none',
   borderRadius: '6px',
   fontSize: '12px',
-
   cursor: 'pointer'
 };
 
@@ -40,7 +39,6 @@ const [error, setError] = useState(null);
   const [showMessages, setShowMessages] = useState(false); 
   const[showTransactional, setShowTransactional]= useState(false);
   const[showPhone, setShowPhone]= useState(false);
-  const[showReport, setShowReport]= useState(false);
   const [selectedStatus, setSelectedStatus] = useState(null);
 const [selectedPeriod, setSelectedPeriod] = useState(null); // 'month' | 'week' | 'yesterday'
 const [allData, setAllData] = useState([]);
@@ -54,13 +52,35 @@ useEffect(() => {
   fetch('http://localhost:8080/api/complaints/all')
     .then(res => res.json())
     .then(data => {
+      setComplaints(data);
       setAllData(data);
-       console.log("AAAAA",data)
+      setLoading(false);
     })
-   
-    .catch(err => console.error('Failed to fetch data', err));
+    .catch(err => {
+      setError(err.message);
+      setLoading(false);
+    });
 }, []);
 
+const CustomLegend = ({ payload }) => (
+  <ul style={{ listStyle: 'none', margin: 0, padding: '10px' }}>
+    {payload.map((entry, index) => (
+      <li key={`item-${index}`} style={{ padding: '3px 6px', display: 'flex', alignItems: 'center' }}>
+        <span
+          style={{
+            display: 'inline-block',
+            width: '10px',
+            height: '10px',
+            borderRadius: '50%',
+            backgroundColor: entry.color,
+            marginRight: '6px',
+          }}
+        />
+        <span style={{ color: entry.color }}>{entry.value}</span>
+      </li>
+    ))}
+  </ul>
+);
 
 
 const getStatusWiseData = (complaints) => {
@@ -99,26 +119,7 @@ const pieData = useMemo(() => {
 // Fetch data from the API
 
 // Fetch data from the API
-useEffect(() => {
-  fetch('http://localhost:8080/api/complaints/all')
-    .then(response => {
-      if (!response.ok) {
-        console.error('Response not OK:', response.status, response.statusText);
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log(data);
-      setComplaints(data);
-      setLoading(false);
-    })
-    .catch(error => {
-      console.error('Error fetching data:', error);
-      setError(error.message);
-      setLoading(false);
-    });
-}, []);
+
 
 const now = new Date();
 
@@ -160,11 +161,18 @@ console.log('Yesterday:', yesterday.length);
 const getStatusCounts = (data) => {
   const statusCounts = {};
   data.forEach(item => {
-    const status = item.status;
+    let status = item.status || 'Unknown';
+
+    // ✅ Group non-Pending/Resolved into In_Progress
+    if (status !== 'Pending' && status !== 'Resolved') {
+      status = 'In_Progress';
+    }
+
     statusCounts[status] = (statusCounts[status] || 0) + 1;
   });
   return Object.entries(statusCounts).map(([name, value]) => ({ name, value }));
 };
+
 
 const pieDataMonth = getStatusCounts(last30Days);
 const pieDataWeek = getStatusCounts(last7Days);
@@ -287,42 +295,119 @@ if (selectedStatus && selectedPeriod) {
 
         {/* Summary Boxes */}
         <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', height: '100px',width:'100%' }}>
-          <div style={{ flex: 1, background: '#f0f0f0', padding: '1rem', borderRadius: '8px', }}>
-        <p style={{ marginTop: '22px', fontSize: '22px', fontWeight: 'bold',marginLeft: '110px' }}>
-   {complaints.length}
-</p>
+         <div
+  style={{
+    flex: 1,
+    background: '#f0f0f0',
+    padding: '1rem',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'transform 0.2s',
+  }}
+  onClick={() => navigate('/table')}
+  onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.02)')}
+  onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1.0)')}
+>
+  <p style={{ marginTop: '22px', fontSize: '22px', fontWeight: 'bold', marginLeft: '110px' }}>
+    {complaints.length}
+  </p>
+  <div
+    style={{
+      background: '#0d6efd',
+      height: '35px',
+      padding: '1rem',
+      borderRadius: '8px',
+      color: 'white',
+      width: '100px',
+      fontSize: '12px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: '-22%',
+    }}
+  >
+    <h3 style={{ margin: 0 }}>Total Complaints</h3>
+  </div>
+</div>
 
-           <div style={{background: '#0d6efd',height: '35px',padding: '1rem',borderRadius: '8px',color: 'white',width: '100px',fontSize: '12px',display: 'flex',alignItems: 'center',justifyContent: 'center', marginTop: '-33%'}}>
-              <h3 style={{ margin: 0 }}>Total Complaints</h3>
-            </div>
-          </div>
-          <div style={{ flex: 1, background: '#f0f0f0', padding: '1rem', borderRadius: '8px' }}>
-            <p style={{ marginTop: '22px', fontSize: '22px', fontWeight: 'bold',marginLeft: '110px' }}>
-   {resolvedCount}
-</p>
-              <div style={{background: '#0d6efd',height: '35px',padding: '1rem',borderRadius: '8px',color: 'white',width: '100px',fontSize: '12px',display: 'flex',alignItems: 'center',justifyContent: 'center', marginTop: '-33%'}}>
-   
+ <div
+  style={{
+    flex: 1,
+    background: '#f0f0f0',
+    padding: '1rem',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'transform 0.2s',
+  }}
+  onClick={() => navigate('/table', { state: { status: 'Resolved' } })}
+  onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.02)')}
+  onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1.0)')}
+>
+  <p style={{ marginTop: '22px', fontSize: '22px', fontWeight: 'bold', marginLeft: '110px' }}>
+    {resolvedCount}
+  </p>
+  <div
+    style={{
+      background: '#0d6efd',
+      height: '35px',
+      padding: '1rem',
+      borderRadius: '8px',
+      color: 'white',
+      width: '100px',
+      fontSize: '12px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: '-22%',
+    }}
+  >
     <h3 style={{ margin: 0 }}>Resolved Complaints</h3>
   </div>
-          </div>
-        <div style={{ flex: 1, background: '#f0f0f0', padding: '1rem', borderRadius: '8px' }}>
-        <p style={{ marginTop: '22px', fontSize: '22px', fontWeight: 'bold',marginLeft: '110px' }}>
-   {pendingCount}
-</p>
-  <div style={{background: '#0d6efd',height: '35px',padding: '1rem',borderRadius: '8px',color: 'white',width: '100px',fontSize: '12px',display: 'flex',alignItems: 'center',justifyContent: 'center', marginTop: '-33%'}}>
+</div>
+<div
+  style={{
+    flex: 1,
+    background: '#f0f0f0',
+    padding: '1rem',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'transform 0.2s',
+  }}
+  onClick={() => navigate('/table', { state:{status: 'Pending'}})}
+  onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.02)')}
+  onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1.0)')}
+>
+  <p style={{ marginTop: '22px', fontSize: '22px', fontWeight: 'bold', marginLeft: '110px' }}>
+    {pendingCount}
+  </p>
+  <div
+    style={{
+      background: '#0d6efd',
+      height: '35px',
+      padding: '1rem',
+      borderRadius: '8px',
+      color: 'white',
+      width: '100px',
+      fontSize: '12px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: '-22%',
+    }}
+  >
     <h3 style={{ margin: 0 }}>Pending Complaints</h3>
   </div>
 </div>
 
-          <div style={{ flex: 1, background: '#f0f0f0', padding: '1rem', borderRadius: '8px' }}>
+          {/* <div style={{ flex: 1, background: '#f0f0f0', padding: '1rem', borderRadius: '8px' }}>
  <div style={{background: '#0d6efd',height: '35px',padding: '1rem',borderRadius: '8px',color: 'white',width: '100px',fontSize: '12px',display: 'flex',alignItems: 'center',justifyContent: 'center', marginTop: '1%'}}>
     <h3 style={{ margin: 0 }}>Empty</h3>
   </div>
-</div>
+</div> */}
 
         </div>
 
- <div style={{ display: 'flex', justifyContent: '', gap: '100px' , fontSize: '11px', marginTop: '-10px', marginLeft: '5%' }}>
+ <div style={{ display: 'flex', gap: '100px' , fontSize: '11px', marginTop: '-10px', marginLeft: '5%' }}>
   {/* Month Wise PieChart */}
   <div style={{ textAlign: 'center' }}>
     <h2>Months Wise</h2>
@@ -344,7 +429,7 @@ if (selectedStatus && selectedPeriod) {
     ))}
   </Pie>
   <Tooltip />
-  <Legend layout="vertical" align="right" verticalAlign="top" />
+       <Legend layout="vertical" align="right" verticalAlign="top" content={<CustomLegend />} />
 </PieChart>
 
   </div>
@@ -353,25 +438,25 @@ if (selectedStatus && selectedPeriod) {
   <div style={{ textAlign: 'center' }}>
     <h2>Week Wise</h2>
    <PieChart width={250} height={250}>
-  <Pie
-    data={pieDataWeek}
-    cx="50%"
-    cy="30%"
-    outerRadius={70}
-    fill="#8884d8"
-    dataKey="value"
-    onClick={(data) => {
-      setSelectedStatus(data.name);
-      setSelectedPeriod('week');
-    }}
-  >
-    {pieDataWeek.map((entry, index) => (
-      <Cell key={`cell-week-${index}`} fill={COLORS[index % COLORS.length]} />
-    ))}
-  </Pie>
-  <Tooltip />
-  <Legend layout="vertical" align="right" verticalAlign="top" />
-</PieChart>
+      <Pie
+        data={pieDataWeek}
+        cx="50%"
+        cy="30%"
+        outerRadius={70}
+        fill="#8884d8"
+        dataKey="value"
+        onClick={(data) => {
+          setSelectedStatus(data.name);
+          setSelectedPeriod('week');
+        }}
+      >
+        {pieDataWeek.map((entry, index) => (
+          <Cell key={`cell-week-${index}`} fill={COLORS[index % COLORS.length]} />
+        ))}
+      </Pie>
+      <Tooltip />
+      <Legend layout="vertical" align="right" verticalAlign="top" content={<CustomLegend />} />
+    </PieChart>
 
   </div>
 
@@ -396,7 +481,7 @@ if (selectedStatus && selectedPeriod) {
     ))}
   </Pie>
   <Tooltip />
-  <Legend layout="vertical" align="right" verticalAlign="top" />
+      <Legend layout="vertical" align="right" verticalAlign="top" content={<CustomLegend />} />
 </PieChart>
 
   </div>
@@ -421,7 +506,7 @@ if (selectedStatus && selectedPeriod) {
     }}
   >
     {/* Clear Filter Button */}
-    {selectedStatus && selectedPeriod && (
+    {/* {selectedStatus && selectedPeriod && (
       <button
         onClick={() => {
           setSelectedStatus(null);
@@ -447,10 +532,10 @@ if (selectedStatus && selectedPeriod) {
       >
         All Data
       </button>
-    )}
+    )} */}
 
     {/* Filter Icon */}
-    <div
+    {/* <div
       onClick={() => navigate('/table')}
       style={{
         display: 'flex',
@@ -464,14 +549,14 @@ if (selectedStatus && selectedPeriod) {
     >
       <FaFilter style={{ fontSize: '20px', marginRight: '6px' }} />
       <span style={{ fontWeight: 'bold' }}>Filter</span>
-    </div>
+    </div> */}
   </div>
 </div>
 
 
  {/* Complaints Table */}
         {/* <h4 style={{ marginTop: '2rem', marginLeft: '50%' }}>Unresolved Complaints</h4> */}
-<div
+{/* <div
   style={{
     width: '1000px',
     margin: '20px auto',
@@ -564,7 +649,7 @@ if (selectedStatus && selectedPeriod) {
       ))}
     </tbody>
   </table>
-</div>
+</div> */}
 
 
 
