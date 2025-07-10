@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { FaFilter } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import "../styles/Dash.css";
@@ -43,11 +44,14 @@ const [error, setError] = useState(null);
 const [selectedPeriod, setSelectedPeriod] = useState(null); // 'month' | 'week' | 'yesterday'
 const [allData, setAllData] = useState([]);
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+const CATEGORY_COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#845EC2', '#D65DB1', '#FF6F91', '#2C73D2'];
+const [selectedCategoryStatus, setSelectedCategoryStatus] = useState(null);
 
   const navigate = useNavigate();
   
   const resolvedCount = complaints.filter(c => c.status === 'Resolved').length;
 const pendingCount = complaints.filter(c => c.status === 'Pending').length;
+
 useEffect(() => {
   fetch('http://localhost:8080/api/complaints/all')
     .then(res => res.json())
@@ -200,6 +204,25 @@ if (selectedStatus && selectedPeriod) {
   // Show all data by default
  filteredData = allData; 
 }
+
+const categoryWiseData = useMemo(() => {
+  const categoryCount = {};
+  
+  complaints
+    .filter(item => {
+      if (!selectedCategoryStatus) return true; // Show all if no filter is selected
+      return selectedCategoryStatus === 'In_Progress'
+        ? item.status !== 'Resolved' && item.status !== 'Pending'
+        : item.status === selectedCategoryStatus;
+    })
+    .forEach(item => {
+      const category = item.category || 'Unknown';
+      categoryCount[category] = (categoryCount[category] || 0) + 1;
+    });
+
+  return Object.entries(categoryCount).map(([name, value]) => ({ name, value }));
+}, [complaints, selectedCategoryStatus]);
+
 
 
   return (
@@ -486,6 +509,46 @@ if (selectedStatus && selectedPeriod) {
 
   </div>
 </div>
+
+<div style={{ marginTop: '2rem', marginLeft: 'auto', marginRight: 'auto', width: '100%' }}>
+  <h3 style={{ textAlign: 'center' }}>Category Wise Complaints</h3>
+ <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+ <button
+  style={{ backgroundColor: 'green', color: 'white', padding: '8px 12px', marginRight: '10px', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+  onClick={() => setSelectedCategoryStatus('Resolved')}
+>
+  Resolved
+</button>
+
+<button
+  style={{ backgroundColor: 'orange', color: 'white', padding: '8px 12px', marginRight: '10px', border: 'none', borderRadius: '4px' , cursor: 'pointer'}}
+  onClick={() => setSelectedCategoryStatus('Pending')}
+>
+  Pending
+</button>
+
+<button
+  style={{ backgroundColor: 'blue', color: 'white', padding: '8px 12px', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+  onClick={() => setSelectedCategoryStatus('In_Progress')}
+>
+  In Progress
+</button>
+
+</div>
+  <ResponsiveContainer width="100%" height={460}>
+    <BarChart data={categoryWiseData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis dataKey="name" interval={0} angle={-25} textAnchor="end" height={60} />
+      <YAxis />
+      <Tooltip />
+     <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+  {categoryWiseData.map((entry, index) => (
+    <Cell key={`cell-${index}`} fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]} />
+  ))}
+</Bar>
+    </BarChart>
+  </ResponsiveContainer>
+</div>
 <div
   style={{
     position: 'sticky',
@@ -650,6 +713,8 @@ if (selectedStatus && selectedPeriod) {
     </tbody>
   </table>
 </div> */}
+
+
 
 
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { FaEye } from 'react-icons/fa';
 
 
 export default function Table() {
@@ -12,14 +13,15 @@ const [dateTo, setDateTo] = useState(today);
 const location = useLocation();
   const navigate = useNavigate();
   const [category, setCategory] = useState('');
-
+const [showModal, setShowModal] = useState(false);
+const [escalations, setEscalations] = useState(null);
   // New state for status
 const [status, setStatus] = useState('');
 
 const filteredComplaints = complaints.filter((item) => {
   const complaintDate = new Date(item.createdAt);
   const from = dateFrom ? new Date(dateFrom) : null;
-  const to = dateTo ? new Date(dateTo) : null;
+  const to = dateTo ? new Date(`${dateTo}T23:59:59.999`) : null;
   // Check date range
   const isInDateRange =
     (!from || complaintDate >= from) &&
@@ -30,7 +32,7 @@ const filteredComplaints = complaints.filter((item) => {
   !status ||
   item.status === status ||
   (status === 'In_Progress' &&
-    ['Esc_1', 'Esc_2', 'Assigned'].includes(item.status));
+   ! ['Resolved', 'Pending'].includes(item.status));
 
 
   // Check category
@@ -66,8 +68,34 @@ useEffect(() => {
       });
   }, []);
 
-  
+  const handleViewDetails = (id) => {
+  fetch(`http://localhost:8080/api/complaints/get/${id}/escalations`)
+    .then(response => response.json())
+    .then(data => {
+      setEscalations(data);
+      setShowModal(true);
+    })
+    .catch(error => {
+      console.error("Error fetching escalation:", error);
+    });
+};
 
+
+const tableHeaderStyle = {
+  border: '1px solid #dee2e6',
+  padding: '10px',
+  textAlign: 'center',
+  fontWeight: 'bold',
+  backgroundColor: '#e9ecef',
+  fontSize: '14px',
+};
+
+const tableCellStyle = {
+  border: '1px solid #dee2e6',
+  padding: '8px',
+  textAlign: 'center',
+  fontSize: '14px',
+};
 
   const buttonStyle = {
     display: 'block',
@@ -204,7 +232,7 @@ useEffect(() => {
         boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
       }}
     >
-      {['Name', 'Category', 'Description', 'Status','Esclation', 'Time', 'Phone No', 'View Details'].map(
+      {['Name', 'Category', 'Description','OfficerName','OfficerContact', 'Status','Esclation', 'Time', 'Phone No', 'View Details',' Complaints Details'].map(
         (heading, idx) => (
           <th
             key={idx}
@@ -301,6 +329,30 @@ useEffect(() => {
             {item.description}
           </td>
           <td
+            style={{
+              border: '1px solid #dee2e6',
+              padding: '6px 8px',
+              fontSize: '13px',
+              textAlign: 'center',
+              whiteSpace: 'nowrap',
+              minWidth: '180px',
+            }}
+          >
+       {item.lastEscalatedOfficerName}
+          </td>
+          <td
+            style={{
+              border: '1px solid #dee2e6',
+              padding: '6px 8px',
+              fontSize: '13px',
+              textAlign: 'center',
+              whiteSpace: 'nowrap',
+              minWidth: '180px',
+            }}
+          >
+     {item.lastEscalatedOfficerPhone}
+          </td>
+          <td
   style={{
     border: '1px solid #dee2e6',
     padding: '6px 8px',
@@ -338,7 +390,6 @@ useEffect(() => {
     ? `Esc_${item.escalationLevel}`
     : 'Not Assigned'}
 </td>
-
           <td
             style={{
               border: '1px solid #dee2e6',
@@ -365,7 +416,7 @@ useEffect(() => {
               textAlign: 'center',
             }}
           >
-            {item.phoneNumber}
+            {item.whatsappId}
           </td>
         
   <td
@@ -398,14 +449,153 @@ useEffect(() => {
     return `${diffHrs}h`;
   })()}
 </td>
-
-
-
+<td
+  style={{
+    border: '1px solid #dee2e6',
+    padding: '6px 8px',
+    fontSize: '13px',
+    textAlign: 'center',
+    whiteSpace: 'nowrap',
+    minWidth: '180px',
+    cursor: 'pointer',
+  }}
+  onClick={() => handleViewDetails(item.id)}
+  title="View Escalation Details"
+>
+  <FaEye style={{ color: '#0d6efd' }} />
+</td>
         </tr>
       ))
     )}
   </tbody>
 </table>
+{showModal && escalations && (
+  <div
+    style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 9999,
+    }}
+  >
+    <div
+      style={{
+        backgroundColor: '#fff',
+        padding: '25px 30px',
+        borderRadius: '12px',
+        width: '600px',
+        maxHeight: '85vh',
+        overflowY: 'auto',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+      }}
+    >
+      <h2 style={{ color: '#0d6efd', marginBottom: '20px', textAlign: 'center' }}>
+        Escalation Details
+      </h2>
+
+      <div
+  style={{
+    fontSize: '15px',
+    marginBottom: '20px',
+    padding: '15px 20px',
+    backgroundColor: '#f9f9f9',
+    border: '1px solid #e0e0e0',
+    borderRadius: '10px',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '12px',
+    alignItems: 'center',
+  }}
+>
+  <span>📂 <strong>Department:</strong> {escalations.departmentName}</span>
+  <span>📝 <strong>Description:</strong> {escalations.description}</span>
+  <span>📍 <strong>Ward Number:</strong> {escalations.wardNumber}</span>
+  <span>👤 <strong>Citizen Name:</strong> {escalations.citizenName}</span>
+  <span>📞 <strong>Contact:</strong> {escalations.citizenContact}</span>
+</div>
+
+
+      <h3 style={{ marginTop: '20px', color: '#1BA1E2' }}>Escalation History</h3>
+      <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '15px' }}>
+  <thead>
+    <tr style={{ backgroundColor: '#f1f1f1' }}>
+      <th style={tableHeaderStyle}>Escalation Level</th>
+      <th style={tableHeaderStyle}>Officer Name</th>
+      <th style={tableHeaderStyle}>Contact No</th>
+      <th style={tableHeaderStyle}>Time</th>
+      <th style={tableHeaderStyle}>Duration</th>
+    </tr>
+  </thead>
+  <tbody>
+    {escalations.escalationHistory.map((item, index) => {
+      const current = item.escalationTime;
+      const next = escalations.escalationHistory[index + 1]?.escalationTime;
+      const isLast = index === escalations.escalationHistory.length - 1;
+      let endTime = !isLast ? next : escalations.resolvedDate || new Date().toISOString();
+
+      const diffMs = new Date(endTime) - new Date(current);
+      const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
+      const minutes = Math.floor((diffMs / (1000 * 60)) % 60);
+      let duration = '';
+if (days > 0) duration += `${days}d `;
+if (hours > 0) duration += `${hours}h`;
+duration = duration.trim();
+
+// Optional: If both are 0, show "Less than 1h" instead
+if (!duration) duration = 'Less than 1h';
+
+
+      let color = '#000';
+      const totalHours = diffMs / (1000 * 60 * 60);
+      if (escalations.resolvedDate && isLast) {
+        color = 'green';
+      } else if (totalHours > 24) {
+        color = 'red';
+      }
+
+      return (
+        <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#ffffff' : '#f9f9f9' }}>
+          <td style={tableCellStyle}>Escalation Level {item.escalationLevel}</td>
+          <td style={tableCellStyle}>{item.officerName}</td>
+          <td style={tableCellStyle}>{item.officerContact}</td>
+          <td style={tableCellStyle}>{new Date(item.escalationTime).toLocaleString('en-IN')}</td>
+          <td style={{ ...tableCellStyle, color }}>{duration}</td>
+        </tr>
+      );
+    })}
+  </tbody>
+</table>
+
+
+      <div style={{ textAlign: 'center', marginTop: '30px' }}>
+        <button
+          onClick={() => setShowModal(false)}
+          style={{
+            padding: '8px 20px',
+            backgroundColor: '#0d6efd',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '6px',
+            fontSize: '15px',
+            cursor: 'pointer',
+            transition: 'background-color 0.3s',
+          }}
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
 </div>
 
