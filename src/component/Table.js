@@ -419,24 +419,25 @@ const tableCellStyle = {
             {item.whatsappId}
           </td>
         
-  <td
+ <td
   style={{
     border: '1px solid #dee2e6',
     padding: '6px 8px',
     fontWeight: 'bold',
     fontSize: '13px',
     color: (() => {
-      if (item.status === 'Resolved') return 'green'; // ✅ Green for Resolved
       const created = new Date(item.createdAt);
       const now = new Date();
       const diffHrsTotal = Math.floor((now - created) / (1000 * 60 * 60));
-      return diffHrsTotal >= 48 ? 'red' : 'green'; // 🔴 Red if ≥ 48 hours, else green
+      
+      if (item.status === 'Resolved') return 'green';
+      return diffHrsTotal < 24 ? 'green' : 'red'; // ⬅️ Green if < 24h, else red
     })(),
     textAlign: 'center',
   }}
 >
   {(() => {
-    if (item.status === 'Resolved') return 'Resolved'; // ✅ Only show text for Resolved
+    if (item.status === 'Resolved') return 'Resolved';
 
     const created = new Date(item.createdAt);
     const now = new Date();
@@ -449,6 +450,7 @@ const tableCellStyle = {
     return `${diffHrs}h`;
   })()}
 </td>
+
 <td
   style={{
     border: '1px solid #dee2e6',
