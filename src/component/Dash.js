@@ -528,26 +528,36 @@ const categoryWiseData = useMemo(() => {
 </button>
 
 <button
-  style={{ backgroundColor: 'blue', color: 'white', padding: '8px 12px', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+  style={{ backgroundColor: 'blue', color: 'white', padding: '8px 12px',marginRight: '10px', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
   onClick={() => setSelectedCategoryStatus('In_Progress')}
 >
   In Progress
 </button>
-
+<button
+  style={{ backgroundColor: 'Red', color: 'white', padding: '8px 12px', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+  onClick={(e) => setSelectedCategoryStatus('Rejected')}
+>
+    Rejected
+</button>
 </div>
+  {categoryWiseData.length === 0 ? (
+  <p style={{ textAlign: 'center', color: 'red', fontWeight: 'bold' }}>No Department</p>
+) : (
   <ResponsiveContainer width="100%" height={460}>
     <BarChart data={categoryWiseData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
       <CartesianGrid strokeDasharray="3 3" />
       <XAxis dataKey="name" interval={0} angle={-25} textAnchor="end" height={60} />
       <YAxis />
       <Tooltip />
-     <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-  {categoryWiseData.map((entry, index) => (
-    <Cell key={`cell-${index}`} fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]} />
-  ))}
-</Bar>
+      <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+        {categoryWiseData.map((entry, index) => (
+          <Cell key={`cell-${index}`} fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]} />
+        ))}
+      </Bar>
     </BarChart>
   </ResponsiveContainer>
+)}
+
 </div>
 <div
   style={{

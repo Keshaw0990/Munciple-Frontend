@@ -32,7 +32,7 @@ const filteredComplaints = complaints.filter((item) => {
   !status ||
   item.status === status ||
   (status === 'In_Progress' &&
-   ! ['Resolved', 'Pending'].includes(item.status));
+   ! ['Resolved', 'Pending','Rejected'].includes(item.status));
 
 
   // Check category
@@ -182,6 +182,7 @@ const tableCellStyle = {
   <option value="Resolved">Resolved</option>
   <option value="Pending">Pending</option>
   <option value="In_Progress">In_Progress</option>
+   <option value="Rejected">Rejected</option>
 </select>
 
 
@@ -329,13 +330,15 @@ const tableCellStyle = {
             {item.description}
           </td>
           <td
-            style={{
+           style={{
               border: '1px solid #dee2e6',
               padding: '6px 8px',
               fontSize: '13px',
+              wordWrap: 'break-word',
+              whiteSpace: 'normal',
+              maxWidth: '250px',
+              overflowWrap: 'break-word',
               textAlign: 'center',
-              whiteSpace: 'nowrap',
-              minWidth: '180px',
             }}
           >
        {item.lastEscalatedOfficerName}
@@ -364,6 +367,8 @@ const tableCellStyle = {
         ? 'red'
         : item.status === 'Resolved'
         ? 'green'
+        : item.status === 'Rejected'
+        ? 'black'
         : '#0d6efd', // blue for other statuses
   }}
 >
@@ -371,6 +376,8 @@ const tableCellStyle = {
     ? 'Resolved'
     : item.status === 'Pending'
     ? 'Pending'
+    : item.status === 'Rejected'
+    ? 'Rejected'
     : 'In_Progress'}
 </td>
 
@@ -431,24 +438,28 @@ const tableCellStyle = {
       const diffHrsTotal = Math.floor((now - created) / (1000 * 60 * 60));
       
       if (item.status === 'Resolved') return 'green';
+       if (item.status === 'Rejected') return 'black';
       return diffHrsTotal < 24 ? 'green' : 'red'; // ⬅️ Green if < 24h, else red
     })(),
     textAlign: 'center',
   }}
 >
   {(() => {
-    if (item.status === 'Resolved') return 'Resolved';
+  if (item.status === 'Rejected') return 'Rejected';
+  if (item.status === 'Resolved') return 'Resolved';
 
-    const created = new Date(item.createdAt);
-    const now = new Date();
-    const diffMs = now - created;
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    const diffHrs = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
+  const created = new Date(item.createdAt);
+  const now = new Date();
 
-    if (diffDays > 0 && diffHrs > 0) return `${diffDays}d ${diffHrs}h`;
-    if (diffDays > 0) return `${diffDays}d`;
-    return `${diffHrs}h`;
-  })()}
+  const diffMs = now - created;
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const diffHrs = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
+
+  if (diffDays > 0 && diffHrs > 0) return `${diffDays}d ${diffHrs}h`;
+  if (diffDays > 0) return `${diffDays}d`;
+  return `${diffHrs}h`;
+})()}
+
 </td>
 
 <td
