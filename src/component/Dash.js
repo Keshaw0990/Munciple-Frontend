@@ -53,7 +53,7 @@ const [selectedCategoryStatus, setSelectedCategoryStatus] = useState(null);
 const pendingCount = complaints.filter(c => c.status === 'Pending').length;
 
 useEffect(() => {
-  fetch('http://localhost:8080/api/complaints/all')
+  fetch('http://45.114.143.153:8080/api/complaints/all')
     .then(res => res.json())
     .then(data => {
       setComplaints(data);
@@ -546,8 +546,18 @@ const categoryWiseData = useMemo(() => {
   <ResponsiveContainer width="100%" height={460}>
     <BarChart data={categoryWiseData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
       <CartesianGrid strokeDasharray="3 3" />
-      <XAxis dataKey="name" interval={0} angle={-25} textAnchor="end" height={60} />
-      <YAxis />
+     <XAxis
+  dataKey="name"
+  interval={0}
+  angle={-15}
+  textAnchor="end"
+  height={100}
+  tick={{ fontSize: 12}}
+/>
+<YAxis
+  tick={{ fontSize: 12 }}
+/>
+
       <Tooltip />
       <Bar dataKey="value" radius={[4, 4, 0, 0]}>
         {categoryWiseData.map((entry, index) => (

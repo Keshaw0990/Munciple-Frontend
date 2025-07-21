@@ -48,7 +48,7 @@ useEffect(() => {
 }, [location.state]);
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/complaints/all')
+    fetch('http://45.114.143.153:8080/api/complaints/all')
       .then(response => {
         if (!response.ok) {
           console.error('Response not OK:', response.status, response.statusText);
@@ -69,7 +69,7 @@ useEffect(() => {
   }, []);
 
   const handleViewDetails = (id) => {
-  fetch(`http://localhost:8080/api/complaints/get/${id}/escalations`)
+  fetch(`http://45.114.143.153:8080/api/complaints/get/${id}/escalations`)
     .then(response => response.json())
     .then(data => {
       setEscalations(data);
@@ -233,7 +233,7 @@ const tableCellStyle = {
         boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
       }}
     >
-      {['Name', 'Category', 'Description','OfficerName','OfficerContact', 'Status','Esclation', 'Time', 'Phone No', 'View Details',' Complaints Details'].map(
+      {['Citizen Name', 'Citizen Contact', 'Officer Name','Officer Contact',' Complaint Category', ' Complaint Description', ' Complaint Status','Esclation Level', 'Register Time',  'View Details',' Complaints Details'].map(
         (heading, idx) => (
           <th
             key={idx}
@@ -306,30 +306,13 @@ const tableCellStyle = {
               border: '1px solid #dee2e6',
               padding: '6px 8px',
               fontSize: '13px',
-              wordWrap: 'break-word',
-              whiteSpace: 'normal',
-              maxWidth: '150px',
-              overflowWrap: 'break-word',
               textAlign: 'center',
             }}
           >
-            {item.category}
+            {item.whatsappId}
           </td>
-          <td
-            style={{
-              border: '1px solid #dee2e6',
-              padding: '6px 8px',
-              fontSize: '13px',
-              wordWrap: 'break-word',
-              whiteSpace: 'normal',
-              maxWidth: '250px',
-              overflowWrap: 'break-word',
-              textAlign: 'center',
-            }}
-          >
-            {item.description}
-          </td>
-          <td
+
+            <td
            style={{
               border: '1px solid #dee2e6',
               padding: '6px 8px',
@@ -355,6 +338,35 @@ const tableCellStyle = {
           >
      {item.lastEscalatedOfficerPhone}
           </td>
+          <td
+            style={{
+              border: '1px solid #dee2e6',
+              padding: '6px 8px',
+              fontSize: '13px',
+              wordWrap: 'break-word',
+              whiteSpace: 'normal',
+              maxWidth: '150px',
+              overflowWrap: 'break-word',
+              textAlign: 'center',
+            }}
+          >
+            {item.category}
+          </td>
+          <td
+            style={{
+              border: '1px solid #dee2e6',
+              padding: '6px 8px',
+              fontSize: '13px',
+              wordWrap: 'break-word',
+              whiteSpace: 'normal',
+              maxWidth: '250px',
+              overflowWrap: 'break-word',
+              textAlign: 'center',
+            }}
+          >
+            {item.description}
+          </td>
+        
           <td
   style={{
     border: '1px solid #dee2e6',
@@ -415,16 +427,7 @@ const tableCellStyle = {
               minute: '2-digit',
             })}
           </td>
-          <td
-            style={{
-              border: '1px solid #dee2e6',
-              padding: '6px 8px',
-              fontSize: '13px',
-              textAlign: 'center',
-            }}
-          >
-            {item.whatsappId}
-          </td>
+          
         
  <td
   style={{
