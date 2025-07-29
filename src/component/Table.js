@@ -384,19 +384,25 @@ const tableCellStyle = {
               </td>
 
               <td
-                style={{
-                  border: '1px solid #dee2e6',
-                  padding: '6px 8px',
-                  fontSize: '13px',
-                  wordWrap: 'break-word',
-                  whiteSpace: 'normal',
-                  maxWidth: '250px',
-                  overflowWrap: 'break-word',
-                  textAlign: 'center',
-                }}
-              >
-                {item.lastEscalatedOfficerName}
-              </td>
+  style={{
+    border: '1px solid #dee2e6',
+    padding: '6px 8px',
+    fontSize: '13px',
+    wordWrap: 'break-word',
+    whiteSpace: 'normal',
+    maxWidth: '250px',
+    overflowWrap: 'break-word',
+    textAlign: 'center',
+  }}
+>
+  <div>
+    {item.lastEscalatedOfficerName}
+  </div>
+  <div style={{ fontSize: '9px', color: '#555' }}>
+    ({item.lastEsclatedOfficerDesignation})
+  </div>
+</td>
+
               <td
                 style={{
                   border: '1px solid #dee2e6',
