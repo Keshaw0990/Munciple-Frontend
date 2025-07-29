@@ -168,7 +168,7 @@ const getStatusCounts = (data) => {
     let status = item.status || 'Unknown';
 
     // ✅ Group non-Pending/Resolved into In_Progress
-    if (status !== 'Pending' && status !== 'Resolved') {
+    if (status !== 'Pending' && status !== 'Resolved' && status !== 'Rejected') {
       status = 'In_Progress';
     }
 
@@ -212,7 +212,7 @@ const categoryWiseData = useMemo(() => {
     .filter(item => {
       if (!selectedCategoryStatus) return true; // Show all if no filter is selected
       return selectedCategoryStatus === 'In_Progress'
-        ? item.status !== 'Resolved' && item.status !== 'Pending'
+        ? item.status !== 'Resolved' && item.status !== 'Pending' && item.status !== 'Rejected'
         : item.status === selectedCategoryStatus;
     })
     .forEach(item => {
@@ -384,6 +384,8 @@ const categoryWiseData = useMemo(() => {
       marginTop: '-22%',
     }}
   >
+ 
+ 
     <h3 style={{ margin: 0 }}>Resolved Complaints</h3>
   </div>
 </div>

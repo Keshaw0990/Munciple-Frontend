@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'; // ✅ Correct
 import { FaEye } from 'react-icons/fa';
-
-
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { fas } from '@fortawesome/free-solid-svg-icons';
+library.add(fas);
 export default function Table() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -12,34 +14,66 @@ const [dateFrom, setDateFrom] = useState('');
 const [dateTo, setDateTo] = useState(today);
 const location = useLocation();
   const navigate = useNavigate();
+  const [sortedComplaints, setSortedComplaints] = useState([]);
+const [sortOrderAsc, setSortOrderAsc] = useState(false); // default: descending
+const [showStaticForm, setShowStaticForm] = useState(false);
+
   const [category, setCategory] = useState('');
 const [showModal, setShowModal] = useState(false);
-const [escalations, setEscalations] = useState(null);
+const [escalations, setEscalations] = useState('');
   // New state for status
 const [status, setStatus] = useState('');
+const [searchTerm, setSearchTerm] = useState('');
 
 const filteredComplaints = complaints.filter((item) => {
   const complaintDate = new Date(item.createdAt);
   const from = dateFrom ? new Date(dateFrom) : null;
   const to = dateTo ? new Date(`${dateTo}T23:59:59.999`) : null;
-  // Check date range
+
   const isInDateRange =
     (!from || complaintDate >= from) &&
     (!to || complaintDate <= to);
 
-  // Check status
   const isStatusMatch =
-  !status ||
-  item.status === status ||
-  (status === 'In_Progress' &&
-   ! ['Resolved', 'Pending','Rejected'].includes(item.status));
+    !status ||
+    item.status === status ||
+    (status === 'In_Progress' &&
+      !['Resolved', 'Pending', 'Rejected'].includes(item.status));
 
-
-  // Check category
   const isCategoryMatch = !category || item.category === category;
 
-  return isInDateRange && isStatusMatch && isCategoryMatch;
+  const search = searchTerm.toLowerCase();
+
+  const isSearchMatch =
+    !searchTerm ||
+    (item.userName && item.userName.toLowerCase().includes(search)) ||
+    (item.whatsappId && item.whatsappId.toLowerCase().includes(search)) ||
+    (item.lastEscalatedOfficerName && item.lastEscalatedOfficerName.toLowerCase().includes(search)) ||
+    (item.lastEscalatedOfficerPhone && item.lastEscalatedOfficerPhone.toLowerCase().includes(search)) ||
+    (item.category && item.category.toLowerCase().includes(search)) ||
+    (item.description && item.description.toLowerCase().includes(search)) ||
+    (item.status && item.status.toLowerCase().includes(search)) ||
+    (item.escalationLevel && `esc_${item.escalationLevel}`.toLowerCase().includes(search));
+
+  return isInDateRange && isStatusMatch && isCategoryMatch && isSearchMatch;
 });
+
+ 
+
+
+useEffect(() => {
+  const sorted = [...filteredComplaints].sort((a, b) => {
+    const timeA = new Date(a.createdAt).getTime();
+    const timeB = new Date(b.createdAt).getTime();
+    return sortOrderAsc ? timeA - timeB : timeB - timeA;
+  });
+  setSortedComplaints(sorted);
+}, [filteredComplaints, sortOrderAsc]);
+
+const toggleSortOrder = () => {
+  setSortOrderAsc((prev) => !prev);
+};
+
 
 useEffect(() => {
   if (location.state && location.state.status) {
@@ -140,7 +174,18 @@ const tableCellStyle = {
 
       {/* Main content */}
       <div>
-        {/* Date filter - moved to top right */}
+  <div style={{ position: 'absolute', top: '60px', right: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+  <h4 style={{ margin: 0 }}>Search..</h4>
+  <input
+    type='text'
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    style={{ padding: '6px', width: '300px',  }}
+    placeholder="Search by name, phone, category, status, etc."
+  />
+</div>
+
+
 <div
   style={{
     display: 'flex',
@@ -152,9 +197,11 @@ const tableCellStyle = {
     gap: '13px',
     flexWrap: 'wrap',
     marginRight: '-12%',
-    marginTop:'50px'
+    marginTop:'80px'
   }}
 >
+
+
   <label style={{ fontWeight: 'bold' }}>Date:</label>
   <input
     type="date"
@@ -218,273 +265,300 @@ const tableCellStyle = {
   }}
 >
   <table
-  style={{
-    width: '100%',
-    borderCollapse: 'collapse',
-    fontSize: '8px',
-    tableLayout: 'fixed',
-  }}
->
-  <thead>
-    <tr
       style={{
-        background: 'linear-gradient(to right, #0d6efd, #1BA1E2)',
-        color: 'white',
-        boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+        width: '100%',
+        borderCollapse: 'collapse',
+        fontSize: '8px',
+        tableLayout: 'fixed',
       }}
     >
-      {['Citizen Name', 'Citizen Contact', 'Officer Name','Officer Contact',' Complaint Category', ' Complaint Description', ' Complaint Status','Esclation Level', 'Register Time',  'View Details',' Complaints Details'].map(
-        (heading, idx) => (
-          <th
-            key={idx}
-            style={{
-              border: '1px solid #dee2e6',
-              padding: '6px',
-              position: 'sticky',
-              top: -10,
-              backgroundColor: '#1BA1E2',
-              zIndex: 1,
-              textAlign: 'center',
-              fontWeight: 'bold',
-              fontSize: '15px',
-              width: '120px',
-              ...(idx === 0 && { borderTopLeftRadius: '6px' }),
-              ...(idx === 6 && { borderTopRightRadius: '6px' }),
-            }}
-          >
-            {heading}
-          </th>
-        )
-      )}
-    </tr>
-  </thead>
+      <thead>
+  <tr
+    style={{
+      background: 'linear-gradient(to right, #0d6efd, #1BA1E2)',
+      color: 'white',
+      boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+    }}
+  >
+    {[
+      'Citizen Name',
+      'Citizen Contact',
+      'Officer Name',
+      'Officer Contact',
+      ' Complaint Category',
+      ' Complaint Description',
+      ' Complaint Status',
+      'Esclation Level',
+      'Register Time',
+      'View Details',
+      ' Complaints Details',
+    ].map((heading, idx) => (
+      <th
+        key={idx}
+        style={{
+          border: '1px solid #dee2e6',
+          padding: '6px',
+          position: 'sticky',
+          top: -10,
+          backgroundColor: '#1BA1E2',
+          zIndex: 1,
+          textAlign: 'center',
+          fontWeight: 'bold',
+          fontSize: '15px',
+          width: '140px',
+          ...(idx === 0 && { borderTopLeftRadius: '6px' }),
+          ...(idx === 6 && { borderTopRightRadius: '6px' }),
+        }}
+      >
+        {heading === 'Register Time' ? (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span>{heading}</span>
+            <FontAwesomeIcon
+              icon={['fas', 'sort']}
+              style={{ cursor: 'pointer' }}
+              onClick={toggleSortOrder}
+              title={`Sort by Register Time (${sortOrderAsc ? 'Ascending' : 'Descending'})`}
+            />
+          </div>
+        ) : (
+          heading
+        )}
+      </th>
+    ))}
+  </tr>
+</thead>
 
-  <tbody>
-    {filteredComplaints.length === 0 ? (
-      <tr>
-        <td
-          colSpan="8"
-          style={{
-            textAlign: 'center',
-            padding: '16px',
-            fontSize: '16px',
-            fontWeight: 'bold',
-            color: 'red',
-          }}
-        >
-         {status} Status is not available
-        </td>
-      </tr>
-    ) : (
-      filteredComplaints.map((item, index) => (
-        <tr
-          key={index}
-          style={{
-            backgroundColor: index % 2 === 0 ? '#f1f9ff' : '#ffffff',
-            transition: 'background-color 0.3s',
-          }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.backgroundColor = '#d9efff')
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.backgroundColor =
-              index % 2 === 0 ? '#f1f9ff' : '#ffffff')
-          }
-        >
-          <td
-            style={{
-              border: '1px solid #dee2e6',
-              padding: '6px 8px',
-              fontSize: '13px',
-              textAlign: 'center',
-            }}
-          >
-            {item.userName}
-          </td>
-          <td
-            style={{
-              border: '1px solid #dee2e6',
-              padding: '6px 8px',
-              fontSize: '13px',
-              textAlign: 'center',
-            }}
-          >
-            {item.whatsappId}
-          </td>
 
+      <tbody>
+        {filteredComplaints.length === 0 ? (
+          <tr>
             <td
-           style={{
-              border: '1px solid #dee2e6',
-              padding: '6px 8px',
-              fontSize: '13px',
-              wordWrap: 'break-word',
-              whiteSpace: 'normal',
-              maxWidth: '250px',
-              overflowWrap: 'break-word',
-              textAlign: 'center',
-            }}
-          >
-       {item.lastEscalatedOfficerName}
-          </td>
-          <td
-            style={{
-              border: '1px solid #dee2e6',
-              padding: '6px 8px',
-              fontSize: '13px',
-              textAlign: 'center',
-              whiteSpace: 'nowrap',
-              minWidth: '180px',
-            }}
-          >
-     {item.lastEscalatedOfficerPhone}
-          </td>
-          <td
-            style={{
-              border: '1px solid #dee2e6',
-              padding: '6px 8px',
-              fontSize: '13px',
-              wordWrap: 'break-word',
-              whiteSpace: 'normal',
-              maxWidth: '150px',
-              overflowWrap: 'break-word',
-              textAlign: 'center',
-            }}
-          >
-            {item.category}
-          </td>
-          <td
-            style={{
-              border: '1px solid #dee2e6',
-              padding: '6px 8px',
-              fontSize: '13px',
-              wordWrap: 'break-word',
-              whiteSpace: 'normal',
-              maxWidth: '250px',
-              overflowWrap: 'break-word',
-              textAlign: 'center',
-            }}
-          >
-            {item.description}
-          </td>
-        
-          <td
-  style={{
-    border: '1px solid #dee2e6',
-    padding: '6px 8px',
-    fontWeight: 'bold',
-    fontSize: '13px',
-    textAlign: 'center',
-    color:
-      item.status === 'Pending'
-        ? 'red'
-        : item.status === 'Resolved'
-        ? 'green'
-        : item.status === 'Rejected'
-        ? 'black'
-        : '#0d6efd', // blue for other statuses
-  }}
->
-  {item.status === 'Resolved'
-    ? 'Resolved'
-    : item.status === 'Pending'
-    ? 'Pending'
-    : item.status === 'Rejected'
-    ? 'Rejected'
-    : 'In_Progress'}
-</td>
+              colSpan="8"
+              style={{
+                textAlign: 'center',
+                padding: '16px',
+                fontSize: '16px',
+                fontWeight: 'bold',
+                color: 'red',
+              }}
+            >
+              {status} No complaints found for the selected filters.
 
-            <td
-  style={{
-    border: '1px solid #dee2e6',
-    padding: '6px 8px',
-    fontSize: '13px',
-    wordWrap: 'break-word',
-    whiteSpace: 'normal',
-    maxWidth: '250px',
-    overflowWrap: 'break-word',
-    textAlign: 'center',
-  }}
->
-  {item.escalationLevel
-    ? `Esc_${item.escalationLevel}`
-    : 'Not Assigned'}
-</td>
-          <td
-            style={{
-              border: '1px solid #dee2e6',
-              padding: '6px 8px',
-              fontSize: '13px',
-              textAlign: 'center',
-              whiteSpace: 'nowrap',
-              minWidth: '180px',
-            }}
-          >
-            {new Date(item.createdAt).toLocaleString('en-IN', {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
-          </td>
-          
-        
- <td
-  style={{
-    border: '1px solid #dee2e6',
-    padding: '6px 8px',
-    fontWeight: 'bold',
-    fontSize: '13px',
-    color: (() => {
-      const created = new Date(item.createdAt);
-      const now = new Date();
-      const diffHrsTotal = Math.floor((now - created) / (1000 * 60 * 60));
-      
-      if (item.status === 'Resolved') return 'green';
-       if (item.status === 'Rejected') return 'black';
-      return diffHrsTotal < 24 ? 'green' : 'red'; // ⬅️ Green if < 24h, else red
-    })(),
-    textAlign: 'center',
-  }}
->
-  {(() => {
-  if (item.status === 'Rejected') return 'Rejected';
-  if (item.status === 'Resolved') return 'Resolved';
+            </td>
+          </tr>
+        ) : (
+          sortedComplaints.map((item, index) => (
+            <tr
+              key={index}
+              style={{
+                backgroundColor: index % 2 === 0 ? '#f1f9ff' : '#ffffff',
+                transition: 'background-color 0.3s',
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor = '#d9efff')
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor =
+                  index % 2 === 0 ? '#f1f9ff' : '#ffffff')
+              }
+            >
+              <td
+                style={{
+                  border: '1px solid #dee2e6',
+                  padding: '6px 8px',
+                  fontSize: '13px',
+                  textAlign: 'center',
+                }}
+              >
+                {item.userName}
+              </td>
+              <td
+                style={{
+                  border: '1px solid #dee2e6',
+                  padding: '6px 8px',
+                  fontSize: '13px',
+                  textAlign: 'center',
+                }}
+              >
+                {item.whatsappId}
+              </td>
 
-  const created = new Date(item.createdAt);
-  const now = new Date();
+              <td
+                style={{
+                  border: '1px solid #dee2e6',
+                  padding: '6px 8px',
+                  fontSize: '13px',
+                  wordWrap: 'break-word',
+                  whiteSpace: 'normal',
+                  maxWidth: '250px',
+                  overflowWrap: 'break-word',
+                  textAlign: 'center',
+                }}
+              >
+                {item.lastEscalatedOfficerName}
+              </td>
+              <td
+                style={{
+                  border: '1px solid #dee2e6',
+                  padding: '6px 8px',
+                  fontSize: '13px',
+                  textAlign: 'center',
+                  whiteSpace: 'nowrap',
+                  minWidth: '180px',
+                }}
+              >
+                {item.lastEscalatedOfficerPhone}
+              </td>
+              <td
+                style={{
+                  border: '1px solid #dee2e6',
+                  padding: '6px 8px',
+                  fontSize: '13px',
+                  wordWrap: 'break-word',
+                  whiteSpace: 'normal',
+                  maxWidth: '150px',
+                  overflowWrap: 'break-word',
+                  textAlign: 'center',
+                }}
+              >
+                {item.category}
+              </td>
+              <td
+                style={{
+                  border: '1px solid #dee2e6',
+                  padding: '6px 8px',
+                  fontSize: '13px',
+                  wordWrap: 'break-word',
+                  whiteSpace: 'normal',
+                  maxWidth: '250px',
+                  overflowWrap: 'break-word',
+                  textAlign: 'center',
+                }}
+              >
+                {item.description}
+              </td>
 
-  const diffMs = now - created;
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  const diffHrs = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
+              <td
+                style={{
+                  border: '1px solid #dee2e6',
+                  padding: '6px 8px',
+                  fontWeight: 'bold',
+                  fontSize: '13px',
+                  textAlign: 'center',
+                  color:
+                    item.status === 'Pending'
+                      ? 'red'
+                      : item.status === 'Resolved'
+                      ? 'green'
+                      : item.status === 'Rejected'
+                      ? 'black'
+                      : '#0d6efd',
+                }}
+              >
+                {item.status === 'Resolved'
+                  ? 'Resolved'
+                  : item.status === 'Pending'
+                  ? 'Pending'
+                  : item.status === 'Rejected'
+                  ? 'Rejected'
+                  : 'In_Progress'}
+              </td>
 
-  if (diffDays > 0 && diffHrs > 0) return `${diffDays}d ${diffHrs}h`;
-  if (diffDays > 0) return `${diffDays}d`;
-  return `${diffHrs}h`;
-})()}
+              <td
+                style={{
+                  border: '1px solid #dee2e6',
+                  padding: '6px 8px',
+                  fontSize: '13px',
+                  wordWrap: 'break-word',
+                  whiteSpace: 'normal',
+                  maxWidth: '250px',
+                  overflowWrap: 'break-word',
+                  textAlign: 'center',
+                }}
+              >
+                {item.escalationLevel
+                  ? `Esc_${item.escalationLevel}`
+                  : 'Not Assigned'}
+              </td>
+              <td
+                style={{
+                  border: '1px solid #dee2e6',
+                  padding: '6px 8px',
+                  fontSize: '13px',
+                  textAlign: 'center',
+                  whiteSpace: 'nowrap',
+                  minWidth: '180px',
+                }}
+              >
+                {new Date(item.createdAt).toLocaleString('en-IN', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </td>
 
-</td>
+              <td
+                style={{
+                  border: '1px solid #dee2e6',
+                  padding: '6px 8px',
+                  fontWeight: 'bold',
+                  fontSize: '13px',
+                  color: (() => {
+                    const created = new Date(item.createdAt);
+                    const now = new Date();
+                    const diffHrsTotal = Math.floor(
+                      (now - created) / (1000 * 60 * 60)
+                    );
 
-<td
-  style={{
-    border: '1px solid #dee2e6',
-    padding: '6px 8px',
-    fontSize: '13px',
-    textAlign: 'center',
-    whiteSpace: 'nowrap',
-    minWidth: '180px',
-    cursor: 'pointer',
-  }}
-  onClick={() => handleViewDetails(item.id)}
-  title="View Escalation Details"
->
-  <FaEye style={{ color: '#0d6efd' }} />
-</td>
-        </tr>
-      ))
-    )}
-  </tbody>
-</table>
+                    if (item.status === 'Resolved') return 'green';
+                    if (item.status === 'Rejected') return 'black';
+                    return diffHrsTotal < 24 ? 'green' : 'red';
+                  })(),
+                  textAlign: 'center',
+                }}
+              >
+                {(() => {
+                  if (item.status === 'Rejected') return 'Rejected';
+                  if (item.status === 'Resolved') return 'Resolved';
+
+                  const created = new Date(item.createdAt);
+                  const now = new Date();
+
+                  const diffMs = now - created;
+                  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                  const diffHrs = Math.floor(
+                    (diffMs / (1000 * 60 * 60)) % 24
+                  );
+
+                  if (diffDays > 0 && diffHrs > 0)
+                    return `${diffDays}d ${diffHrs}h`;
+                  if (diffDays > 0) return `${diffDays}d`;
+                  return `${diffHrs}h`;
+                })()}
+              </td>
+
+              <td
+                style={{
+                  border: '1px solid #dee2e6',
+                  padding: '6px 8px',
+                  fontSize: '13px',
+                  textAlign: 'center',
+                  whiteSpace: 'nowrap',
+                  minWidth: '180px',
+                  cursor: 'pointer',
+                }}
+                onClick={() => handleViewDetails(item.id)}
+                title="View Escalation Details"
+              >
+                <FaEye style={{ color: '#0d6efd' }} />
+              </td>
+            </tr>
+          ))
+        )}
+      </tbody>
+    </table>
 {showModal && escalations && (
   <div
     style={{
@@ -513,7 +587,146 @@ const tableCellStyle = {
     >
       <h2 style={{ color: '#0d6efd', marginBottom: '20px', textAlign: 'center' }}>
         Escalation Details
+
+        
       </h2>
+<div style={{ display: 'flex', justifyContent: 'flex-end'}}>
+  <button
+    onClick={() => setShowStaticForm(true)}
+    style={{
+      padding: '8px 10px',
+      backgroundColor: '#007bff', // Bootstrap blue
+      color: '#fff',
+      border: 'none',
+      borderRadius: '5px',
+      fontSize: '16px',
+      cursor: 'pointer',
+      boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)',
+      transition: 'background-color 0.3s ease',
+    }}
+    onMouseOver={e => e.target.style.backgroundColor = '#0056b3'}
+    onMouseOut={e => e.target.style.backgroundColor = '#007bff'}
+    
+  >
+    View Photo
+  </button>
+</div>
+
+
+
+{showStaticForm && (
+  <div
+    style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      backgroundColor: 'rgba(0, 0, 0, 0.4)',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 1000,
+    }}
+  >
+    <div
+      style={{
+        backgroundColor: '#fff',
+        padding: '30px',
+        borderRadius: '10px',
+        width: '1100px',
+        maxHeight: '90vh',
+        overflowY: 'auto',
+        boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+        position: 'relative',
+      }}
+    >
+      <h2 style={{ marginBottom: '20px', color: '#1BA1E2' }}>Complaint Details</h2>
+
+    {/* Complaint Image */}
+{/* Complaint and Resolved Images side by side */}
+<div style={{ display: 'flex', gap: '20px', marginBottom: '15px' }}>
+  {/* Complaint Image */}
+  <div style={{ flex: 1 }}>
+  <p><strong>Complaint Image:</strong></p>
+  {escalations.complaintImageUrl ? (
+    <img
+      src={escalations.complaintImageUrl}
+      alt="Complaint"
+     style={{
+  width: '600px',          // 👈 increase image width
+  height: 'auto',          // 👈 auto-adjust height to maintain aspect ratio
+  objectFit: 'contain',
+  borderRadius: '6px',
+  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+  backgroundColor: '#f8f8f8',
+  maxWidth: '100%'         // 👈 prevents overflow if screen is smaller
+}}
+    />
+  ) : (
+    <p style={{ color: 'gray', fontStyle: 'italic' }}>Image not available</p>
+  )}
+</div>
+
+<div style={{ flex: 1 }}>
+  <p><strong>Resolved Image:</strong></p>
+  {escalations.resolvedImageUrl ? (
+    <img
+      src={escalations.resolvedImageUrl}
+      alt="Resolved"
+    style={{
+  width: '600px',          // 👈 increase image width
+  height: 'auto',          // 👈 auto-adjust height to maintain aspect ratio
+  objectFit: 'contain',
+  borderRadius: '6px',
+  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+  backgroundColor: '#f8f8f8',
+  maxWidth: '100%'         // 👈 prevents overflow if screen is smaller
+}}
+    />
+  ) : (
+    <p style={{ color: 'gray', fontStyle: 'italic' }}>Image not available</p>
+  )}
+</div>
+
+</div>
+
+
+
+      {/* Google Maps Location */}
+      <div style={{ marginBottom: '15px' }}>
+        <p><strong>Location:</strong></p>
+        <a
+          href={escalations.locationUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            color: '#0d6efd',
+            textDecoration: 'underline',
+          }}
+        >
+          Open Location in Google Maps
+        </a>
+      </div>
+
+      {/* Close Button */}
+      <button
+        onClick={() => setShowStaticForm(false)}
+        style={{
+          position: 'absolute',
+          top: '10px',
+          right: '10px',
+          border: 'none',
+          background: 'transparent',
+          fontSize: '18px',
+          cursor: 'pointer',
+        }}
+      >
+        ❌
+      </button>
+    </div>
+  </div>
+)}
 
       <div
   style={{
@@ -607,14 +820,11 @@ if (!duration) duration = 'Less than 1h';
         >
           Close
         </button>
-      </div>
+      </div>  
     </div>
   </div>
 )}
-
-
 </div>
-
       </div>
     </div>
   );

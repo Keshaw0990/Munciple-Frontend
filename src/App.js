@@ -5,6 +5,7 @@ import Dash from './component/Dash';
 import Footer from "./component/Footer";
 import Table from './component/Table';
 import Info from "./component/Info";
+
 function App() {
   return (
     <div className="App">
@@ -15,6 +16,7 @@ function App() {
   <Route path='/' element={<Dash />} />
   <Route path='table' element={<Table />} /> {/* <-- Add this */}
   <Route path='info' element= {<Info />}/>
+  
 </Routes>
 </BrowserRouter>
 <Footer />
