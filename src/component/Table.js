@@ -4,6 +4,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'; // ✅ Correct
 import { FaEye } from 'react-icons/fa';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { fas } from '@fortawesome/free-solid-svg-icons';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
+
 library.add(fas);
 export default function Table() {
   const [loading, setLoading] = useState(true);
@@ -17,13 +20,14 @@ const location = useLocation();
   const [sortedComplaints, setSortedComplaints] = useState([]);
 const [sortOrderAsc, setSortOrderAsc] = useState(false); // default: descending
 const [showStaticForm, setShowStaticForm] = useState(false);
-
   const [category, setCategory] = useState('');
 const [showModal, setShowModal] = useState(false);
 const [escalations, setEscalations] = useState('');
   // New state for status
 const [status, setStatus] = useState('');
 const [searchTerm, setSearchTerm] = useState('');
+const [tableData, setTableData] = useState([]);
+
 
 const filteredComplaints = complaints.filter((item) => {
   const complaintDate = new Date(item.createdAt);
@@ -58,9 +62,84 @@ const filteredComplaints = complaints.filter((item) => {
   return isInDateRange && isStatusMatch && isCategoryMatch && isSearchMatch;
 });
 
- 
 
+const handleExportToExcel = async () => {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Complaints');
 
+  // Define headers
+  const headers = [
+    'Citizen Name',
+    'Citizen Contact',
+    'Officer Name',
+    'Officer Designation',
+    'Officer Contact',
+    'Complaint Category',
+    'Complaint Description',
+    'Complaint Status',
+    'Escalation Level',
+    'Register Time',
+    'View Details', // ⬅️ This is the dynamic column you're missing
+  ];
+
+  worksheet.addRow(headers);
+
+  sortedComplaints.forEach(item => {
+    const created = new Date(item.createdAt);
+    const now = new Date();
+    const diffMs = now - created;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    const diffHrs = Math.floor((diffMs / (1000 * 60 * 60)) % 24);
+
+    let viewDetails = '';
+    if (item.status === 'Rejected') {
+      viewDetails = 'Rejected';
+    } else if (item.status === 'Resolved') {
+      viewDetails = 'Resolved';
+    } else {
+      viewDetails = diffDays > 0 && diffHrs > 0
+        ? `${diffDays}d ${diffHrs}h`
+        : diffDays > 0
+        ? `${diffDays}d`
+        : `${diffHrs}h`;
+    }
+
+    worksheet.addRow([
+      item.userName,
+      item.whatsappId,
+      item.lastEscalatedOfficerName,
+      item.lastEsclatedOfficerDesignation,
+      item.lastEscalatedOfficerPhone,
+      item.category,
+      item.description,
+      item.status,
+      item.escalationLevel ? `Esc_${item.escalationLevel}` : 'Not Assigned',
+      created.toLocaleString('en-IN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      viewDetails,
+    ]);
+  });
+
+  // Auto-width for all columns
+  worksheet.columns.forEach(column => {
+    let maxLength = 0;
+    column.eachCell({ includeEmpty: true }, cell => {
+      const value = cell.value ? cell.value.toString() : '';
+      maxLength = Math.max(maxLength, value.length);
+    });
+    column.width = maxLength + 6;
+  });
+
+  // Export file
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  saveAs(blob, 'Complaints.xlsx');
+};
 useEffect(() => {
   const sorted = [...filteredComplaints].sort((a, b) => {
     const timeA = new Date(a.createdAt).getTime();
@@ -248,12 +327,22 @@ const tableCellStyle = {
     </option>
   ))}
 </select>
+<button
+  onClick={handleExportToExcel}
+  style={{ width: '150px', padding: '4px 8px' ,fontSize: '15px'}}
+ 
+>
+  Export to Excel
+</button>
+
+
 </div>
+
   {/* Table */}
    <div
   style={{
-    width: '1000px',
-    marginLeft: '17.5%',
+    width: '1050px',
+    marginLeft: '14%',
     height: '300px',
     overflow: 'auto',
     border: '1px solid #ccc',
@@ -596,27 +685,30 @@ const tableCellStyle = {
 
         
       </h2>
-<div style={{ display: 'flex', justifyContent: 'flex-end'}}>
+<div style={{ position: 'relative' }}>
   <button
     onClick={() => setShowStaticForm(true)}
     style={{
-      padding: '8px 10px',
-      backgroundColor: '#007bff', // Bootstrap blue
+      position: 'absolute',  // 👈 floats the button
+      top: -70,
+      right: 0,
+      padding: '8px 8px',
+      backgroundColor: '#007bff',
       color: '#fff',
       border: 'none',
-      borderRadius: '5px',
-      fontSize: '16px',
+      borderRadius: '9px',
+      fontSize: '12px',
       cursor: 'pointer',
       boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)',
       transition: 'background-color 0.3s ease',
     }}
-    onMouseOver={e => e.target.style.backgroundColor = '#0056b3'}
-    onMouseOut={e => e.target.style.backgroundColor = '#007bff'}
-    
+    onMouseOver={(e) => (e.target.style.backgroundColor = '#0056b3')}
+    onMouseOut={(e) => (e.target.style.backgroundColor = '#007bff')}
   >
     View Photo
   </button>
 </div>
+ 
 
 
 

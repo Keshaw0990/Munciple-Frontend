@@ -319,13 +319,17 @@ const categoryWiseData = useMemo(() => {
         {/* Summary Boxes */}
         <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', height: '100px',width:'100%' }}>
          <div
-  style={{
+ style={{
     flex: 1,
     background: '#f0f0f0',
     padding: '1rem',
     borderRadius: '8px',
     cursor: 'pointer',
     transition: 'transform 0.2s',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    position: 'relative',
   }}
   onClick={() => navigate('/table')}
   onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.02)')}
@@ -335,21 +339,26 @@ const categoryWiseData = useMemo(() => {
     {complaints.length}
   </p>
   <div
-    style={{
-      background: '#0d6efd',
-      height: '35px',
-      padding: '1rem',
-      borderRadius: '8px',
-      color: 'white',
-      width: '100px',
-      fontSize: '12px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginTop: '-22%',
-    }}
-  >
-    <h3 style={{ margin: 0 }}>Total Complaints</h3>
+   style={{
+    background: '#0d6efd',
+    padding: '1rem 2rem',
+    borderRadius: '8px',
+    color: 'white',
+    fontSize: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    left: '10px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    width: 'fit-content',
+  }}
+>
+  
+    <h3 style={{ textAlign: 'center', margin: 0 }}>
+  Total  <br />Complaints
+  </h3>
   </div>
 </div>
 
@@ -361,42 +370,63 @@ const categoryWiseData = useMemo(() => {
     borderRadius: '8px',
     cursor: 'pointer',
     transition: 'transform 0.2s',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    position: 'relative',
   }}
   onClick={() => navigate('/table', { state: { status: 'Resolved' } })}
   onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.02)')}
   onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1.0)')}
 >
-  <p style={{ marginTop: '22px', fontSize: '22px', fontWeight: 'bold', marginLeft: '110px' }}>
-    {resolvedCount}
-  </p>
-  <div
-    style={{
-      background: '#0d6efd',
-      height: '35px',
-      padding: '1rem',
-      borderRadius: '8px',
-      color: 'white',
-      width: '100px',
-      fontSize: '12px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginTop: '-22%',
-    }}
-  >
- 
- 
-    <h3 style={{ margin: 0 }}>Resolved Complaints</h3>
-  </div>
-</div>
-<div
+ <p
+ style={{ marginTop: '22px', fontSize: '22px', fontWeight: 'bold', marginLeft: '110px' }}
+>
+  {resolvedCount}
+</p>
+
+
+  {/* Button Inside Main Box, Left-Center */}
+ <div
   style={{
+    background: '#0d6efd',
+    padding: '1rem 2rem',
+    borderRadius: '8px',
+    color: 'white',
+    fontSize: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    left: '10px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    width: 'fit-content',
+  }}
+>
+  <h3 style={{ textAlign: 'center', margin: 0 }}>
+  Resolved  <br />Complaints
+  </h3>
+</div>
+
+
+</div>
+
+
+
+
+<div
+ style={{
     flex: 1,
     background: '#f0f0f0',
     padding: '1rem',
     borderRadius: '8px',
     cursor: 'pointer',
     transition: 'transform 0.2s',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    position: 'relative',
   }}
   onClick={() => navigate('/table', { state:{status: 'Pending'}})}
   onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.02)')}
@@ -406,21 +436,25 @@ const categoryWiseData = useMemo(() => {
     {pendingCount}
   </p>
   <div
-    style={{
-      background: '#0d6efd',
-      height: '35px',
-      padding: '1rem',
-      borderRadius: '8px',
-      color: 'white',
-      width: '100px',
-      fontSize: '12px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginTop: '-22%',
-    }}
+     style={{
+    background: '#0d6efd',
+    padding: '1rem 2rem',
+    borderRadius: '8px',
+    color: 'white',
+    fontSize: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    left: '10px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    width: 'fit-content',
+  }}
   >
-    <h3 style={{ margin: 0 }}>Pending Complaints</h3>
+    <h3 style={{ textAlign: 'center', margin: 0 }}>
+  Pending  <br />Complaints
+  </h3>
   </div>
 </div>
 
