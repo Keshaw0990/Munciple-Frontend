@@ -265,78 +265,84 @@ const tableCellStyle = {
 </div>
 
 
+
+
+
 <div
   style={{
+    position: 'absolute',
+    top: '110px', // adjust top position as needed
+    right: '20px',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'flex-end',
-    color: '#4a235a',
-    fontSize: '18px',
-    marginBottom: '15px',
-    gap: '13px',
     flexWrap: 'wrap',
-    marginRight: '-12%',
-    marginTop:'80px'
+    gap: '10px',
+    maxWidth: '95%', // prevent overflow on small screens
+    justifyContent: 'flex-end'
   }}
 >
-
-
   <label style={{ fontWeight: 'bold' }}>Date:</label>
   <input
     type="date"
     id="dateFrom"
     value={dateFrom}
     onChange={(e) => setDateFrom(e.target.value)}
-    style={{ width: '150px',padding: '4px 8px' ,fontSize: '15px' }}
+    style={{ width: '150px', padding: '4px 8px', fontSize: '15px' }}
   />
+
   <span style={{ fontWeight: 'bold' }}>To</span>
   <input
     type="date"
     id="dateTo"
     value={dateTo}
     onChange={(e) => setDateTo(e.target.value)}
-    style={{ width: '150px',padding: '4px 8px' ,fontSize: '15px' }}
+    style={{ width: '150px', padding: '4px 8px', fontSize: '15px' }}
   />
+
   <label style={{ fontWeight: 'bold' }}>Status:</label>
-<select
-  id="status"
-  value={status}
-  onChange={(e) => setStatus(e.target.value)}
-  style={{ width: '150px', padding: '4px 8px', fontSize: '15px' }}
->
-  <option value="">Select Status</option>
-  <option value="Resolved">Resolved</option>
-  <option value="Pending">Pending</option>
-  <option value="In_Progress">In_Progress</option>
-   <option value="Rejected">Rejected</option>
-</select>
+  <select
+    id="status"
+    value={status}
+    onChange={(e) => setStatus(e.target.value)}
+    style={{ width: '150px', padding: '4px 8px', fontSize: '15px' }}
+  >
+    <option value="">Select Status</option>
+    <option value="Resolved">Resolved</option>
+    <option value="Pending">Pending</option>
+    <option value="In_Progress">In_Progress</option>
+    <option value="Rejected">Rejected</option>
+  </select>
 
+  <label style={{ fontWeight: 'bold' }}>Category:</label>
+  <select
+    id="category"
+    value={category}
+    onChange={(e) => setCategory(e.target.value)}
+    style={{ width: '150px', padding: '4px 8px', fontSize: '15px' }}
+  >
+    <option value="">Select Category</option>
+    {[...new Set(complaints.map(item => item.category))].map((categoryOption, index) => (
+      <option key={index} value={categoryOption}>
+        {categoryOption}
+      </option>
+    ))}
+  </select>
 
-
-<label style={{ fontWeight: 'bold' }}>Category:</label>
-<select
-  id="category"
-  value={category}
-  onChange={(e) => setCategory(e.target.value)}
-  style={{ width: '150px', padding: '4px 8px' ,fontSize: '15px'}}
->
-  <option value="">Select Category</option>
-  {[...new Set(complaints.map(item => item.category))].map((categoryOption, index) => (
-    <option key={index} value={categoryOption}>
-      {categoryOption}
-    </option>
-  ))}
-</select>
-<button
-  onClick={handleExportToExcel}
-  style={{ width: '150px', padding: '4px 8px' ,fontSize: '15px'}}
- 
->
-  Export to Excel
-</button>
-
-
+  <button
+    onClick={handleExportToExcel}
+    style={{
+      width: '150px',
+      padding: '4px 8px',
+      fontSize: '15px'
+    }}
+  >
+    Export to Excel
+  </button>
 </div>
+
+
+
+
 
   {/* Table */}
    <div
