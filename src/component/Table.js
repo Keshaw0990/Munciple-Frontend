@@ -265,22 +265,34 @@ const tableCellStyle = {
 </div>
 
 
-
-
-
 <div
   style={{
-    position: 'absolute',
-    top: '110px', // adjust top position as needed
-    right: '20px',
     display: 'flex',
     alignItems: 'center',
+    justifyContent: 'flex-end',
+    color: '#4a235a',
+    fontSize: '18px',
+    marginBottom: '15px',
+    gap: '13px',
     flexWrap: 'wrap',
-    gap: '10px',
-    maxWidth: '95%', // prevent overflow on small screens
-    justifyContent: 'flex-end'
+    marginTop: '80px',
+    padding: '0 20px',
+    width: '100%',
+    boxSizing: 'border-box',
   }}
 >
+<style>
+{`
+  @media (max-width: 768px) {
+    input[type="date"],
+    select,
+    button {
+      width: 100% !important;
+    }
+  }
+`}
+</style>
+
   <label style={{ fontWeight: 'bold' }}>Date:</label>
   <input
     type="date"
@@ -289,7 +301,6 @@ const tableCellStyle = {
     onChange={(e) => setDateFrom(e.target.value)}
     style={{ width: '150px', padding: '4px 8px', fontSize: '15px' }}
   />
-
   <span style={{ fontWeight: 'bold' }}>To</span>
   <input
     type="date"
@@ -298,7 +309,6 @@ const tableCellStyle = {
     onChange={(e) => setDateTo(e.target.value)}
     style={{ width: '150px', padding: '4px 8px', fontSize: '15px' }}
   />
-
   <label style={{ fontWeight: 'bold' }}>Status:</label>
   <select
     id="status"
@@ -333,7 +343,12 @@ const tableCellStyle = {
     style={{
       width: '150px',
       padding: '4px 8px',
-      fontSize: '15px'
+      fontSize: '15px',
+      backgroundColor: '#0d6efd',
+      color: '#fff',
+      border: 'none',
+      borderRadius: '4px',
+      cursor: 'pointer',
     }}
   >
     Export to Excel
@@ -341,22 +356,20 @@ const tableCellStyle = {
 </div>
 
 
-
-
-
   {/* Table */}
-   <div
+  <div
   style={{
-    width: '1050px',
-    marginLeft: '14%',
+    width: '100%',
+    maxWidth: '1050px',
+    margin: '4% auto 0 auto', // Centered horizontally
     height: '300px',
-    overflow: 'auto',
+    overflowX: 'auto', // Enable horizontal scrolling on small screens
+    overflowY: 'auto',
     border: '1px solid #ccc',
     borderRadius: '8px',
     boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
     padding: '10px',
     backgroundColor: '#f9f9f9',
-    marginTop: '4%',
   }}
 >
   <table
