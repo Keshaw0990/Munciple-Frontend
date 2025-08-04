@@ -253,7 +253,7 @@ const tableCellStyle = {
 
       {/* Main content */}
       <div>
-  <div style={{ position: 'absolute', top: '60px', right: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+  <div style={{ position: 'absolute', top: '65px', right: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>
   <h4 style={{ margin: 0 }}>Search..</h4>
   <input
     type='text'
@@ -267,96 +267,95 @@ const tableCellStyle = {
 
 <div
   style={{
-    display: 'flex',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: '13px',
-    marginTop: '100px',
+    marginTop: '110px',
     marginBottom: '15px',
     padding: '0 20px',
     color: '#4a235a',
     fontSize: '16px',
     width: '100%',
     boxSizing: 'border-box',
+    whiteSpace: 'nowrap', // Keeps everything in one line
   }}
 >
+  <span style={{ display: 'inline-block', marginRight: '10px' }}>
+    <label style={{ fontWeight: 'bold', marginRight: '5px' }}>Date:</label>
+    <input
+      type="date"
+      id="dateFrom"
+      value={dateFrom}
+      onChange={(e) => setDateFrom(e.target.value)}
+      style={{ width: '150px', padding: '4px 8px', fontSize: '15px' }}
+    />
+  </span>
 
+  <span style={{ display: 'inline-block', marginRight: '10px' }}>
+    <span style={{ fontWeight: 'bold', marginRight: '5px' }}>To</span>
+    <input
+      type="date"
+      id="dateTo"
+      value={dateTo}
+      onChange={(e) => setDateTo(e.target.value)}
+      style={{ width: '150px', padding: '4px 8px', fontSize: '15px' }}
+    />
+  </span>
 
-  <label style={{ fontWeight: 'bold' }}>Date:</label>
-  <input
-    type="date"
-    id="dateFrom"
-    value={dateFrom}
-    onChange={(e) => setDateFrom(e.target.value)}
-    style={{ width: '150px',padding: '4px 8px' ,fontSize: '15px' }}
-  />
-  <span style={{ fontWeight: 'bold' }}>To</span>
-  <input
-    type="date"
-    id="dateTo"
-    value={dateTo}
-    onChange={(e) => setDateTo(e.target.value)}
-    style={{ width: '150px',padding: '4px 8px' ,fontSize: '15px' }}
-  />
-  <label style={{ fontWeight: 'bold' }}>Status:</label>
-<select
-  id="status"
-  value={status}
-  onChange={(e) => setStatus(e.target.value)}
-  style={{ width: '150px', padding: '4px 8px', fontSize: '15px' }}
->
-  <option value="">Select Status</option>
-  <option value="Resolved">Resolved</option>
-  <option value="Pending">Pending</option>
-  <option value="In_Progress">In_Progress</option>
-   <option value="Rejected">Rejected</option>
-</select>
+  <span style={{ display: 'inline-block', marginRight: '10px' }}>
+    <label style={{ fontWeight: 'bold', marginRight: '5px' }}>Status:</label>
+    <select
+      id="status"
+      value={status}
+      onChange={(e) => setStatus(e.target.value)}
+      style={{ width: '150px', padding: '4px 8px', fontSize: '15px' }}
+    >
+      <option value="">Select Status</option>
+      <option value="Resolved">Resolved</option>
+      <option value="Pending">Pending</option>
+      <option value="In_Progress">In_Progress</option>
+      <option value="Rejected">Rejected</option>
+    </select>
+  </span>
 
+  <span style={{ display: 'inline-block', marginRight: '10px' }}>
+    <label style={{ fontWeight: 'bold', marginRight: '5px' }}>Category:</label>
+    <select
+      id="category"
+      value={category}
+      onChange={(e) => setCategory(e.target.value)}
+      style={{ width: '150px', padding: '4px 8px', fontSize: '15px' }}
+    >
+      <option value="">Select Category</option>
+      {[...new Set(complaints.map(item => item.category))].map((categoryOption, index) => (
+        <option key={index} value={categoryOption}>
+          {categoryOption}
+        </option>
+      ))}
+    </select>
+  </span>
 
-
-<label style={{ fontWeight: 'bold' }}>Category:</label>
-<select
-  id="category"
-  value={category}
-  onChange={(e) => setCategory(e.target.value)}
-  style={{ width: '150px', padding: '4px 8px' ,fontSize: '15px'}}
->
-  <option value="">Select Category</option>
-  {[...new Set(complaints.map(item => item.category))].map((categoryOption, index) => (
-    <option key={index} value={categoryOption}>
-      {categoryOption}
-    </option>
-  ))}
-</select>
-<div
-  onClick={handleExportToExcel}
-  style={{
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    cursor: 'pointer',
-    color: 'green',
-    fontSize: '16px',
-    fontWeight: 'bold',
-  }}
->
-  <i className="fas fa-file-excel" style={{ fontSize: '20px' }}></i>
-  <span>Export to Excel</span>
+  <span
+    onClick={handleExportToExcel}
+    style={{
+      display: 'inline-block',
+      marginLeft: '10px',
+      cursor: 'pointer',
+      color: 'green',
+      fontSize: '16px',
+      fontWeight: 'bold',
+    }}
+  >
+    <i className="fas fa-file-excel" style={{ fontSize: '20px' }}></i>
+    <span>Export to Excel</span>
+  </span>
 </div>
 
 
-
-
-
-</div>
 
   {/* Table */}
 <div
   style={{
-    maxHeight: '300px',           // Enables vertical scrolling inside
+    maxHeight: '420px',           // Enables vertical scrolling inside
     overflowY: 'auto',
-    //overflowX: 'auto',            // Enables horizontal scroll only inside this div
+    overflowX: 'auto',            // Enables horizontal scroll only inside this div
     border: '1px solid #ccc',
     borderRadius: '8px',
     margin: '0 0 0 170px', // ✅ adds space on the left side
