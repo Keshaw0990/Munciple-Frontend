@@ -225,7 +225,7 @@ const tableCellStyle = {
 
 
   return (
-    <div style={{ display: 'flex', padding: '2rem' }}>
+    <div>
       {/* Sidebar */}
       <div
         style={{
@@ -268,30 +268,20 @@ const tableCellStyle = {
 <div
   style={{
     display: 'flex',
+    flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'flex-end',
-    color: '#4a235a',
-    fontSize: '18px',
-    marginBottom: '15px',
     gap: '13px',
-    flexWrap: 'wrap',
-    marginTop: '80px',
+    marginTop: '100px',
+    marginBottom: '15px',
     padding: '0 20px',
+    color: '#4a235a',
+    fontSize: '16px',
     width: '100%',
     boxSizing: 'border-box',
   }}
 >
-<style>
-{`
-  @media (max-width: 768px) {
-    input[type="date"],
-    select,
-    button {
-      width: 100% !important;
-    }
-  }
-`}
-</style>
+
 
   <label style={{ fontWeight: 'bold' }}>Date:</label>
   <input
@@ -299,7 +289,7 @@ const tableCellStyle = {
     id="dateFrom"
     value={dateFrom}
     onChange={(e) => setDateFrom(e.target.value)}
-    style={{ width: '150px', padding: '4px 8px', fontSize: '15px' }}
+    style={{ width: '150px',padding: '4px 8px' ,fontSize: '15px' }}
   />
   <span style={{ fontWeight: 'bold' }}>To</span>
   <input
@@ -307,79 +297,82 @@ const tableCellStyle = {
     id="dateTo"
     value={dateTo}
     onChange={(e) => setDateTo(e.target.value)}
-    style={{ width: '150px', padding: '4px 8px', fontSize: '15px' }}
+    style={{ width: '150px',padding: '4px 8px' ,fontSize: '15px' }}
   />
   <label style={{ fontWeight: 'bold' }}>Status:</label>
-  <select
-    id="status"
-    value={status}
-    onChange={(e) => setStatus(e.target.value)}
-    style={{ width: '150px', padding: '4px 8px', fontSize: '15px' }}
-  >
-    <option value="">Select Status</option>
-    <option value="Resolved">Resolved</option>
-    <option value="Pending">Pending</option>
-    <option value="In_Progress">In_Progress</option>
-    <option value="Rejected">Rejected</option>
-  </select>
+<select
+  id="status"
+  value={status}
+  onChange={(e) => setStatus(e.target.value)}
+  style={{ width: '150px', padding: '4px 8px', fontSize: '15px' }}
+>
+  <option value="">Select Status</option>
+  <option value="Resolved">Resolved</option>
+  <option value="Pending">Pending</option>
+  <option value="In_Progress">In_Progress</option>
+   <option value="Rejected">Rejected</option>
+</select>
 
-  <label style={{ fontWeight: 'bold' }}>Category:</label>
-  <select
-    id="category"
-    value={category}
-    onChange={(e) => setCategory(e.target.value)}
-    style={{ width: '150px', padding: '4px 8px', fontSize: '15px' }}
-  >
-    <option value="">Select Category</option>
-    {[...new Set(complaints.map(item => item.category))].map((categoryOption, index) => (
-      <option key={index} value={categoryOption}>
-        {categoryOption}
-      </option>
-    ))}
-  </select>
 
-  <button
-    onClick={handleExportToExcel}
-    style={{
-      width: '150px',
-      padding: '4px 8px',
-      fontSize: '15px',
-      backgroundColor: '#0d6efd',
-      color: '#fff',
-      border: 'none',
-      borderRadius: '4px',
-      cursor: 'pointer',
-    }}
-  >
-    Export to Excel
-  </button>
+
+<label style={{ fontWeight: 'bold' }}>Category:</label>
+<select
+  id="category"
+  value={category}
+  onChange={(e) => setCategory(e.target.value)}
+  style={{ width: '150px', padding: '4px 8px' ,fontSize: '15px'}}
+>
+  <option value="">Select Category</option>
+  {[...new Set(complaints.map(item => item.category))].map((categoryOption, index) => (
+    <option key={index} value={categoryOption}>
+      {categoryOption}
+    </option>
+  ))}
+</select>
+<div
+  onClick={handleExportToExcel}
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    cursor: 'pointer',
+    color: 'green',
+    fontSize: '16px',
+    fontWeight: 'bold',
+  }}
+>
+  <i className="fas fa-file-excel" style={{ fontSize: '20px' }}></i>
+  <span>Export to Excel</span>
 </div>
 
 
+
+
+
+</div>
+
   {/* Table */}
-  <div
+<div
   style={{
-    width: '100%',
-    maxWidth: '1050px',
-    margin: '4% auto 0 auto', // Centered horizontally
-    height: '300px',
-    overflowX: 'auto', // Enable horizontal scrolling on small screens
+    maxHeight: '300px',           // Enables vertical scrolling inside
     overflowY: 'auto',
+    //overflowX: 'auto',            // Enables horizontal scroll only inside this div
     border: '1px solid #ccc',
     borderRadius: '8px',
+    margin: '0 0 0 170px', // ✅ adds space on the left side
+
     boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-    padding: '10px',
-    backgroundColor: '#f9f9f9',
   }}
 >
   <table
-      style={{
-        width: '100%',
-        borderCollapse: 'collapse',
-        fontSize: '8px',
-        tableLayout: 'fixed',
-      }}
-    >
+    style={{
+      minWidth: '300px',          // 👈 Ensures table scrolls if content is wider than container
+      width: '100%',
+      borderCollapse: 'collapse',
+      fontSize: '8px',
+      tableLayout: 'fixed',
+    }}
+  >
       <thead>
   <tr
     style={{
@@ -435,8 +428,6 @@ const tableCellStyle = {
     ))}
   </tr>
 </thead>
-
-
       <tbody>
         {filteredComplaints.length === 0 ? (
           <tr>
@@ -727,10 +718,6 @@ const tableCellStyle = {
     View Photo
   </button>
 </div>
- 
-
-
-
 {showStaticForm && (
   <div
     style={{
