@@ -226,22 +226,26 @@ const tableCellStyle = {
 
   return (
     <div>
+
+    
       {/* Sidebar */}
       <div
-        style={{
-    position: 'fixed',        // 👈 Fixes the sidebar
-    top: '40px',              // 👈 Pushes it below the fixed navbar
+  style={{
+    position: 'fixed',
+    top: '40px',
     left: 0,
     width: '130px',
     background: '#19475e',
     padding: '1rem',
     borderRadius: '0 8px 8px 0',
-    height: 'calc(100vh - 45px)', // 👈 Full height minus navbar
+    height: 'calc(100vh - 45px)',
     overflowY: 'auto',
     color: 'white',
     zIndex: 999,
-        }}
-      >
+  }}
+>
+
+      
         <h3 style={{ textAlign: 'center' }}>Contact List</h3>
         <button style={buttonStyle} onClick={() => navigate('/')}>
           Dashboard
@@ -272,12 +276,16 @@ const tableCellStyle = {
     padding: '0 20px',
     color: '#4a235a',
     fontSize: '16px',
-    width: '100%',
+    width: 'calc(100% - 170px)', // Adjust width to fit remaining space
     boxSizing: 'border-box',
-    whiteSpace: 'nowrap', // Keeps everything in one line
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
+    gap: '10px',
+    marginLeft: '170px', // ✅ Aligns with your table
   }}
 >
-  <span style={{ display: 'inline-block', marginRight: '10px' }}>
+  <span>
     <label style={{ fontWeight: 'bold', marginRight: '5px' }}>Date:</label>
     <input
       type="date"
@@ -288,7 +296,7 @@ const tableCellStyle = {
     />
   </span>
 
-  <span style={{ display: 'inline-block', marginRight: '10px' }}>
+  <span>
     <span style={{ fontWeight: 'bold', marginRight: '5px' }}>To</span>
     <input
       type="date"
@@ -299,7 +307,7 @@ const tableCellStyle = {
     />
   </span>
 
-  <span style={{ display: 'inline-block', marginRight: '10px' }}>
+  <span>
     <label style={{ fontWeight: 'bold', marginRight: '5px' }}>Status:</label>
     <select
       id="status"
@@ -315,7 +323,7 @@ const tableCellStyle = {
     </select>
   </span>
 
-  <span style={{ display: 'inline-block', marginRight: '10px' }}>
+  <span>
     <label style={{ fontWeight: 'bold', marginRight: '5px' }}>Category:</label>
     <select
       id="category"
@@ -335,18 +343,19 @@ const tableCellStyle = {
   <span
     onClick={handleExportToExcel}
     style={{
-      display: 'inline-block',
-      marginLeft: '10px',
+      display: 'flex',
+      alignItems: 'center',
       cursor: 'pointer',
       color: 'green',
       fontSize: '16px',
       fontWeight: 'bold',
     }}
   >
-    <i className="fas fa-file-excel" style={{ fontSize: '20px' }}></i>
+    <i className="fas fa-file-excel" style={{ fontSize: '20px', marginRight: '5px' }}></i>
     <span>Export to Excel</span>
   </span>
 </div>
+
 
 
 
