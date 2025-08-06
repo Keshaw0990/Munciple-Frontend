@@ -48,8 +48,24 @@
   margin-top: 2px;
 }
 
+.logo1 {
+  width: 50px;       /* Adjust width as needed */
+  height: auto;       /* Keeps the aspect ratio */
+  object-fit: contain; /* Ensures image scales nicely without distortion */
+  border-radius: 2px;
+}
+  .logo-container-horizontal {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* space between logo and text */
+}
 
-  
+.logo-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: black;
+  white-space: nowrap;
+}
 
 /* html, body {
   overflow-x: hidden;
