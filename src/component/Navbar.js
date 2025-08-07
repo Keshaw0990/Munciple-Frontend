@@ -10,9 +10,12 @@ function Navbar() {
       <div className="leftSide">
         <div className="logo-container-horizontal">
           <img src={logo1} alt="download.jpeg" className="logo1" />
-          <span className="logo-title">
-            Municipal Corporation of Sangli Miraj and Kupwad City
-          </span>
+   <div className="logo-marquee-container">
+  <span className="logo-title">
+    Municipal Corporation of Sangli Miraj and Kupwad City
+  </span>
+</div>
+
         </div>
 
         {/* Keep these lines for future use */}

@@ -757,51 +757,65 @@ const tableCellStyle = {
 
     {/* Complaint Image */}
 {/* Complaint and Resolved Images side by side */}
+{/* Complaint and Resolved Images side by side */}
 <div style={{ display: 'flex', gap: '20px', marginBottom: '15px' }}>
   {/* Complaint Image */}
   <div style={{ flex: 1 }}>
-  <p><strong>Complaint Image:</strong></p>
-  {escalations.complaintImageUrl ? (
-    <img
-      src={escalations.complaintImageUrl}
-      alt="Complaint"
-     style={{
-  width: '600px',          // 👈 increase image width
-  height: 'auto',          // 👈 auto-adjust height to maintain aspect ratio
-  objectFit: 'contain',
-  borderRadius: '6px',
-  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-  backgroundColor: '#f8f8f8',
-  maxWidth: '100%'         // 👈 prevents overflow if screen is smaller
-}}
-    />
-  ) : (
-    <p style={{ color: 'gray', fontStyle: 'italic' }}>Image not available</p>
-  )}
+    <p><strong>Complaint Image:</strong></p>
+    <div style={{
+      width: '100%',
+      height: '400px',              // ✅ fixed height
+      overflow: 'auto',             // ✅ scroll inside if image is large
+      borderRadius: '6px',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+      backgroundColor: '#f8f8f8'
+    }}>
+      {escalations.complaintImageUrl ? (
+        <img
+          src={escalations.complaintImageUrl}
+          alt="Complaint"
+          style={{
+            width: '100%',          // ✅ fit container
+            height: '100%',         // ✅ same height
+            objectFit: 'contain',   // ✅ maintain aspect ratio
+            display: 'block'
+          }}
+        />
+      ) : (
+        <p style={{ color: 'gray', fontStyle: 'italic' }}>Image not available</p>
+      )}
+    </div>
+  </div>
+
+  {/* Resolved Image */}
+  <div style={{ flex: 1 }}>
+    <p><strong>Resolved Image:</strong></p>
+    <div style={{
+      width: '100%',
+      height: '400px',
+      overflow: 'auto',
+      borderRadius: '6px',
+      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+      backgroundColor: '#f8f8f8'
+    }}>
+      {escalations.resolvedImageUrl ? (
+        <img
+          src={escalations.resolvedImageUrl}
+          alt="Resolved"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+            display: 'block'
+          }}
+        />
+      ) : (
+        <p style={{ color: 'gray', fontStyle: 'italic' }}>Image not available</p>
+      )}
+    </div>
+  </div>
 </div>
 
-<div style={{ flex: 1 }}>
-  <p><strong>Resolved Image:</strong></p>
-  {escalations.resolvedImageUrl ? (
-    <img
-      src={escalations.resolvedImageUrl}
-      alt="Resolved"
-    style={{
-  width: '600px',          // 👈 increase image width
-  height: 'auto',          // 👈 auto-adjust height to maintain aspect ratio
-  objectFit: 'contain',
-  borderRadius: '6px',
-  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-  backgroundColor: '#f8f8f8',
-  maxWidth: '100%'         // 👈 prevents overflow if screen is smaller
-}}
-    />
-  ) : (
-    <p style={{ color: 'gray', fontStyle: 'italic' }}>Image not available</p>
-  )}
-</div>
-
-</div>
 
 
 

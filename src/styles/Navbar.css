@@ -60,12 +60,33 @@
   gap: 10px; /* space between logo and text */
 }
 
-.logo-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: black;
+.logo-marquee-container {
+  overflow: hidden;
+  width: 1200px; /* Adjust width as needed */
   white-space: nowrap;
+  position: relative;
 }
+
+.logo-title {
+  display: inline-block;
+  animation: marquee-right-to-left 10s linear infinite;
+  transform: translateX(100%); /* Start fully at right */
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+  font-family: 'Poppins', sans-serif;
+}
+
+@keyframes marquee-right-to-left {
+  0% {
+    transform: translateX(100%); /* Start just outside right */
+  }
+  100% {
+    transform: translateX(-100%); /* Scroll completely out to the left */
+  }
+}
+
 
 /* html, body {
   overflow-x: hidden;
