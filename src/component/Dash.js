@@ -223,7 +223,16 @@ const categoryWiseData = useMemo(() => {
   return Object.entries(categoryCount).map(([name, value]) => ({ name, value }));
 }, [complaints, selectedCategoryStatus]);
 
-
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div style={{ color: "black", fontSize: "14px" }}>
+        {`${label} : ${payload[0].value} Complaints`}
+      </div>
+    );
+  }
+  return null;
+};
 
   return (
     <div style={{ display: 'flex', padding: '2rem' }}>
@@ -312,7 +321,7 @@ const categoryWiseData = useMemo(() => {
           </div>
 
       {/* Right Side: Dashboard Content */}
-      <div style={{ flex: 1, marginTop: '1px', marginLeft: '12%' }}>
+      <div style={{ flex: 1, marginTop: '8px', marginLeft: '12%' }}>
       
         <h3>Dashboard</h3>
 
@@ -375,6 +384,7 @@ const categoryWiseData = useMemo(() => {
     justifyContent: 'center',
     position: 'relative',
   }}
+  
   onClick={() => navigate('/table', { state: { status: 'Resolved' } })}
   onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.02)')}
   onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1.0)')}
@@ -580,28 +590,88 @@ const categoryWiseData = useMemo(() => {
   <p style={{ textAlign: 'center', color: 'red', fontWeight: 'bold' }}>No Department</p>
 ) : (
   <ResponsiveContainer width="100%" height={460}>
-    <BarChart data={categoryWiseData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-      <CartesianGrid strokeDasharray="3 3" />
-     <XAxis
+  <BarChart
+    data={categoryWiseData}
+    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+    barCategoryGap={
+      categoryWiseData.length < 5
+        ? "30%"   // big gap if very few categories
+        : categoryWiseData.length < 10
+        ? "20%"   // medium gap
+        : "10%"   // small gap if many categories
+    }
+    style={{ background: "transparent" }} 
+  >
+    <CartesianGrid strokeDasharray="3 3" />
+  <XAxis
   dataKey="name"
   interval={0}
   angle={-15}
   textAnchor="end"
-  height={100}
-  tick={{ fontSize: 12}}
-/>
-<YAxis
-  tick={{ fontSize: 12 }}
+  height={120} // adjust for multi-line
+  tick={({ x, y, payload }) => {
+    const words = payload.value.split(" ");
+    const lines = [];
+    let currentLine = "";
+
+    const maxCharsPerLine = 15; // adjust based on chart width
+
+    words.forEach((word) => {
+      if ((currentLine + word).length <= maxCharsPerLine) {
+        currentLine += (currentLine ? " " : "") + word;
+      } else {
+        lines.push(currentLine);
+        currentLine = word;
+      }
+    });
+    if (currentLine) lines.push(currentLine);
+
+    return (
+      <text
+        x={x}
+        y={y + 10}
+        textAnchor="end"
+        fontSize={10}
+        transform={`rotate(-15, ${x}, ${y + 10})`}
+      >
+        {lines.map((line, index) => (
+          <tspan key={index} x={x} dy={index === 0 ? 0 : 12}>
+            {line}
+          </tspan>
+        ))}
+      </text>
+    );
+  }}
 />
 
-      <Tooltip />
-      <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-        {categoryWiseData.map((entry, index) => (
-          <Cell key={`cell-${index}`} fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]} />
-        ))}
-      </Bar>
-    </BarChart>
-  </ResponsiveContainer>
+
+    <YAxis tick={{ fontSize: 12 }} />
+   <Tooltip
+   cursor={false}   // ← disables the gray hover rectangle
+  contentStyle={{
+    backgroundColor: "transparent", // remove gray box
+    border: "none",                  // remove border
+    boxShadow: "none"                // remove shadow
+  }}
+  labelStyle={{ color: "#000", fontWeight: "bold" }} // style label
+  itemStyle={{ color: "#333" }} // style text inside tooltip
+/>
+
+    <Bar
+      dataKey="value"
+      radius={[4, 4, 0, 0]}
+      barSize={Math.max(20, Math.min(60, 400 / categoryWiseData.length))}
+    >
+      {categoryWiseData.map((entry, index) => (
+        <Cell
+          key={`cell-${index}`}
+          fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]}
+        />
+      ))}
+    </Bar>
+  </BarChart>
+</ResponsiveContainer>
+
 )}
 
 </div>

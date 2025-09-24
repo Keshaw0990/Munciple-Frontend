@@ -5,15 +5,15 @@ import Dash from './component/Dash';
 import Footer from "./component/Footer";
 import Table from './component/Table';
 import Info from "./component/Info";
-
+import Login from "./component/Login";
 function App() {
   return (
     <div className="App">
    <BrowserRouter>
   <Navbar />
   <Routes>
- 
-  <Route path='/' element={<Dash />} />
+ <Route path="/" element={<Login/>}/>
+  <Route path='/dash' element={<Dash />} />
   <Route path='table' element={<Table />} /> {/* <-- Add this */}
   <Route path='info' element= {<Info />}/>
   

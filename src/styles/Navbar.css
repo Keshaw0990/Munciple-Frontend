@@ -88,8 +88,7 @@
 }
 
 
-/* html, body {
-  overflow-x: hidden;
-  overflow-y: hidden;
-
-} */
+html, body {
+  overflow-x: hidden; /* prevent horizontal scrolling */
+  overflow-y: auto;   /* allow vertical scrolling */
+}

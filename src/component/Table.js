@@ -247,7 +247,7 @@ const tableCellStyle = {
 
       
         <h3 style={{ textAlign: 'center' }}>Contact List</h3>
-        <button style={buttonStyle} onClick={() => navigate('/')}>
+        <button style={buttonStyle} onClick={() => navigate('/dash')}>
           Dashboard
         </button>
         <button style={buttonStyle}>Transactional</button>
