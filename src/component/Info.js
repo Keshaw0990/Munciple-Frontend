@@ -149,7 +149,7 @@ const handleDelete = (officerId) => {
         height: 'calc(100vh - 45px)', overflowY: 'auto', color: 'white', zIndex: 999,
       }}>
         <h3 style={{ textAlign: 'center' }}>Contact List</h3>
-        <button style={buttonStyle} onClick={() => navigate('/')}>Dashboard</button>
+        <button style={buttonStyle} onClick={() => navigate('/dash')}>Dashboard</button>
         <button style={buttonStyle}>Transactional</button>
         <button style={buttonStyle}>Phone Book</button>
         <button style={buttonStyle}>Reports</button>
